@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f766e">
+<title>🎾 Padel de los Lunes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎾%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --primary: #0f766e;
+    --primary-dark: #115e59;
+    --accent: #f59e0b;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .season-badge {
+    font-size: 0.75rem;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  main {
+    padding: 16px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card h2 {
+    margin: 0 0 14px 0;
+    font-size: 1.1rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h3 {
+    margin: 12px 0 8px 0;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--card);
+    color: var(--text);
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  button {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 9px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--primary); color: white; width: 100%; }
+  .btn-primary:hover, .btn-primary:active { background: var(--primary-dark); }
+  .btn-secondary { background: var(--border); color: var(--text); }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
+  .btn-ghost { background: transparent; color: var(--primary); }
+  .btn-accent { background: var(--accent); color: white; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > * { flex: 1; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .field { margin-bottom: 12px; }
+  .player-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+  }
+  .player-chip.selected {
+    border-color: var(--primary);
+    background: #ccfbf1;
+    color: var(--primary-dark);
+  }
+  .player-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: white;
+    font-weight: bold;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { background: var(--bg); font-weight: 600; font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em;}
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .position-1 td { background: #fef3c7; }
+  .position-2 td { background: #f1f5f9; }
+  .position-3 td { background: #fed7aa; }
+  nav.tabs {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  nav.tabs button {
+    background: none;
+    border-radius: 0;
+    padding: 10px 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  nav.tabs button.active { color: var(--primary); }
+  nav.tabs .tab-icon { font-size: 1.4rem; }
+  .view { display: none; }
+  .view.active { display: block; }
+  .modality-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .modality-btn {
+    padding: 14px 8px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.15s;
+  }
+  .modality-btn .emoji { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+  .modality-btn.active {
+    border-color: var(--primary);
+    background: #ccfbf1;
+    color: var(--primary-dark);
+  }
+  .empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .match-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: var(--card);
+  }
+  .match-card .match-date {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.9rem;
+  }
+  .match-card .match-modality {
+    display: inline-block;
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-left: 6px;
+  }
+  .match-card .match-content {
+    font-size: 0.9rem;
+    margin-top: 8px;
+    color: var(--text);
+  }
+  .match-card .match-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  .round-card {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 10px;
+    margin: 8px 0;
+  }
+  .round-card .vs {
+    text-align: center;
+    color: var(--muted);
+    font-weight: bold;
+    margin: 6px 0;
+  }
+  .team-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .set-input {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto;
+    gap: 6px;
+    align-items: center;
+    margin: 6px 0;
+  }
+  .set-input input { padding: 8px; text-align: center; font-weight: 600; font-size: 1.1rem; }
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    box-shadow: var(--shadow);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-box {
+    background: var(--bg);
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+  }
+  .stat-box .stat-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--primary);
+  }
+  .stat-box .stat-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  details {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    list-style: none;
+  }
+  details summary::after {
+    content: " ▼";
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+  details[open] summary::after { content: " ▲"; }
+  .warn-banner {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+  }
+  .pair-suggestion {
+    background: #ecfdf5;
+    border: 1px solid #6ee7b7;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+  .pair-suggestion b { color: var(--primary-dark); }
+  .winner-badge {
+    background: var(--success);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+  @media (min-width: 640px) {
+    .modality-selector { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>
+    <span>🎾 Padel de los Lunes</span>
+    <span class="season-badge" id="currentSeasonBadge">—</span>
+  </h1>
+</header>
+
+<main>
+  <div id="firebaseWarn" class="warn-banner" style="display:none;">
+    ⚠️ Configurá tus credenciales de Firebase en el código (busca <code>FIREBASE_CONFIG</code>) o usa el modo local. Mientras tanto la app funciona offline en tu navegador.
+  </div>
+
+  <!-- ============ VIEW: CARGAR PARTIDO ============ -->
+  <section id="view-new" class="view active">
+    <div class="card">
+      <h2>➕ Nuevo Partido</h2>
+
+      <div class="field">
+        <label>Fecha</label>
+        <input type="date" id="matchDate">
+      </div>
+
+      <label>Modalidad</label>
+      <div class="modality-selector">
+        <div class="modality-btn active" data-mod="americana"><span class="emoji">🔄</span>Americana</div>
+        <div class="modality-btn" data-mod="fijo"><span class="emoji">⚔️</span>Pareja Fija</div>
+        <div class="modality-btn" data-mod="roundrobin"><span class="emoji">🎯</span>Round Robin</div>
+        <div class="modality-btn" data-mod="libre"><span class="emoji">📝</span>Libre</div>
+      </div>
+
+      <div class="field">
+        <label>Jugadores que participan</label>
+        <div id="playerSelector" style="display:flex; flex-wrap: wrap; gap: 6px;"></div>
+      </div>
+
+      <!-- Americana / RoundRobin: rondas autogeneradas -->
+      <div id="americanaBlock" style="display:none;">
+        <h3>Rondas (parejas generadas automáticamente)</h3>
+        <div id="americanaRounds"></div>
+        <button class="btn-secondary btn-sm" onclick="regenerateRounds()" style="margin-top:8px;">🎲 Re-generar parejas</button>
+      </div>
+
+      <!-- Pareja fija -->
+      <div id="fijoBlock" style="display:none;">
+        <h3>Definí las parejas</h3>
+        <div class="field">
+          <label>Equipo A (2 jugadores)</label>
+          <div id="teamASelector" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        </div>
+        <div class="field">
+          <label>Equipo B (2 jugadores)</label>
+          <div id="teamBSelector" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        </div>
+        <h3>Sets jugados</h3>
+        <div id="fijoSets"></div>
+        <button class="btn-secondary btn-sm" onclick="addFijoSet()" style="margin-top:4px;">+ Agregar set</button>
+      </div>
+
+      <!-- Modo libre -->
+      <div id="libreBlock" style="display:none;">
+        <h3>Resultados por jugador</h3>
+        <div id="libreInputs"></div>
+      </div>
+
+      <button class="btn-primary" onclick="saveMatch()" style="margin-top:16px;">💾 Guardar Partido</button>
+    </div>
+  </section>
+
+  <!-- ============ VIEW: HISTORIAL ============ -->
+  <section id="view-history" class="view">
+    <div class="card">
+      <h2>📅 Historial de Partidos</h2>
+      <div class="field">
+        <label>Filtrar por temporada</label>
+        <select id="historyFilter"></select>
+      </div>
+      <div id="matchHistory"></div>
+    </div>
+  </section>
+
+  <!-- ============ VIEW: STATS ============ -->
+  <section id="view-stats" class="view">
+    <div class="card">
+      <h2>🏆 Tabla Histórica</h2>
+      <div class="field">
+        <label>Temporada</label>
+        <select id="statsFilter"></select>
+      </div>
+      <table id="leaderboard">
+        <thead>
+          <tr>
+            <th>#</th><th>Jugador</th>
+            <th class="num">PJ</th><th class="num">G</th>
+            <th class="num">Pts</th><th class="num">%V</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p style="font-size:0.75rem; color:var(--muted); margin-top:8px;">
+        PJ = partidos jugados · G = victorias · Pts = puntos · %V = porcentaje de victorias
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>📊 Estadísticas Avanzadas</h2>
+      <div id="advStats"></div>
+    </div>
+  </section>
+
+  <!-- ============ VIEW: JUGADORES ============ -->
+  <section id="view-players" class="view">
+    <div class="card">
+      <h2>👥 Jugadores</h2>
+      <div id="playersList"></div>
+      <h3 style="margin-top:18px;">Agregar nuevo</h3>
+      <div class="field">
+        <label>Apodo</label>
+        <input type="text" id="newPlayerName" placeholder="Ej: Toto">
+      </div>
+      <div class="row">
+        <div>
+          <label>Emoji</label>
+          <input type="text" id="newPlayerEmoji" placeholder="🦊" maxlength="4">
+        </div>
+        <div>
+          <label>Color</label>
+          <input type="color" id="newPlayerColor" value="#0f766e">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addPlayer()" style="margin-top:12px;">+ Agregar Jugador</button>
+    </div>
+  </section>
+
+  <!-- ============ VIEW: CONFIG ============ -->
+  <section id="view-config" class="view">
+    <div class="card">
+      <h2>⚙️ Temporadas</h2>
+      <div class="field">
+        <label>Temporada activa</label>
+        <select id="activeSeasonSelect"></select>
+      </div>
+      <div id="seasonsList"></div>
+      <h3 style="margin-top:16px;">Nueva temporada</h3>
+      <div class="row">
+        <input type="text" id="newSeasonName" placeholder="Ej: Temporada 2026">
+        <button class="btn-primary" style="max-width:120px;" onclick="addSeason()">+ Crear</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🎯 Sistema de Puntos</h2>
+      <p style="font-size:0.85rem; color:var(--muted); margin:0 0 12px 0;">
+        Puntos otorgados por cada partido/ronda jugada según resultado.
+      </p>
+      <div class="grid-3">
+        <div>
+          <label>Victoria</label>
+          <input type="number" id="pointsWin" value="3" min="0">
+        </div>
+        <div>
+          <label>Empate</label>
+          <input type="number" id="pointsTie" value="1" min="0">
+        </div>
+        <div>
+          <label>Derrota</label>
+          <input type="number" id="pointsLoss" value="0" min="0">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveConfig()" style="margin-top:12px;">Guardar config</button>
+    </div>
+
+    <div class="card">
+      <h2>☁️ Sincronización</h2>
+      <p style="font-size:0.85rem; color:var(--muted);">
+        Estado: <b id="syncStatus">—</b>
+      </p>
+      <p style="font-size:0.8rem; color:var(--muted);">
+        Si Firebase está configurado, los datos se sincronizan en tiempo real entre todos los jugadores.
+        Si no, la app funciona con almacenamiento local (solo en este celular/navegador).
+      </p>
+      <button class="btn-secondary" onclick="exportData()" style="margin-top:6px;">⬇️ Exportar datos (JSON)</button>
+      <button class="btn-secondary" onclick="document.getElementById('importInput').click()" style="margin-top:6px;">⬆️ Importar datos</button>
+      <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(event)">
+      <button class="btn-danger" onclick="clearAll()" style="margin-top:6px;">🗑️ Borrar TODO</button>
+    </div>
+  </section>
+</main>
+
+<nav class="tabs">
+  <button class="active" data-view="new"><span class="tab-icon">➕</span>Cargar</button>
+  <button data-view="history"><span class="tab-icon">📅</span>Historial</button>
+  <button data-view="stats"><span class="tab-icon">🏆</span>Stats</button>
+  <button data-view="players"><span class="tab-icon">👥</span>Jugadores</button>
+  <button data-view="config"><span class="tab-icon">⚙️</span>Config</button>
+</nav>
+
+<div id="toast" class="toast"></div>
+
+<!-- ============ FIREBASE SDK ============ -->
+<script type="module">
+  // ============================================================
+  //  CONFIGURACIÓN FIREBASE
+  //  Reemplazá este objeto con tu propia configuración (ver README)
+  //  Si lo dejás vacío, la app funcionará en modo local.
+  // ============================================================
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBrbPIFKJvzTE5tlBJ_X7LGImV95UCvVug",
+    authDomain: "padel-lunes-17bfd.firebaseapp.com",
+    projectId: "padel-lunes-17bfd",
+    storageBucket: "padel-lunes-17bfd.firebasestorage.app",
+    messagingSenderId: "674379542578",
+    appId: "1:674379542578:web:bc2eec8f2c70465b2e0c2b"
+  };
+
+  let db = null;
+  let useFirebase = false;
+
+  if (FIREBASE_CONFIG.projectId) {
+    try {
+      const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+      const fs = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const app = initializeApp(FIREBASE_CONFIG);
+      db = fs.getFirestore(app);
+      window.__fs = fs;
+      useFirebase = true;
+      document.getElementById('syncStatus').textContent = "🟢 Firebase conectado";
+    } catch(e) {
+      console.error("Error iniciando Firebase:", e);
+      document.getElementById('syncStatus').textContent = "🔴 Error Firebase — modo local";
+      document.getElementById('firebaseWarn').style.display = 'block';
+    }
+  } else {
+    document.getElementById('syncStatus').textContent = "💾 Modo local (sin Firebase)";
+    document.getElementById('firebaseWarn').style.display = 'block';
+  }
+
+  window.__db = db;
+  window.__useFirebase = useFirebase;
+  // Disparar inicialización de la app
+  window.dispatchEvent(new Event('firebaseReady'));
+</script>
+
+<!-- ============ APP LOGIC ============ -->
+<script>
+/* ==================================================================
+   ESTADO GLOBAL
+   ================================================================== */
+const STATE = {
+  players: [],          // {id, name, emoji, color, active, createdAt}
+  seasons: [],          // {id, name, startDate, endDate, active}
+  matches: [],          // {id, date, seasonId, modality, players, rounds, libreStats}
+  config: { pointsWin: 3, pointsTie: 1, pointsLoss: 0, currentSeasonId: null },
+  currentModality: 'americana',
+  matchDraft: {
+    selectedPlayers: [],
+    rounds: [],
+    fijoTeamA: [],
+    fijoTeamB: [],
+    fijoSets: [{a:'', b:''}]
+  },
+  editingMatchId: null
+};
+
+const DEFAULT_PLAYERS = [
+  { name: 'Pato',    emoji: '🐱', color: '#0f766e' },
+  { name: 'Nico',    emoji: '🦊', color: '#dc2626' },
+  { name: 'Chuqui',  emoji: '🐻', color: '#7c3aed' },
+  { name: 'Uriel',   emoji: '🐺', color: '#f59e0b' }
+];
+
+/* ==================================================================
+   STORAGE (Firebase o localStorage)
+   ================================================================== */
+const LS_KEY = 'padelAppData_v2';
+
+function lsLoad() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_KEY)) || {};
+  } catch { return {}; }
+}
+function lsSave() {
+  const data = {
+    players: STATE.players,
+    seasons: STATE.seasons,
+    matches: STATE.matches,
+    config: STATE.config
+  };
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
+
+async function fbCol(name) {
+  const fs = window.__fs;
+  return fs.collection(window.__db, name);
+}
+
+async function dbSet(collection, id, data) {
+  if (window.__useFirebase) {
+    const fs = window.__fs;
+    await fs.setDoc(fs.doc(window.__db, collection, id), data, { merge: true });
+  } else {
+    lsSave();
+  }
+}
+
+async function dbDelete(collection, id) {
+  if (window.__useFirebase) {
+    const fs = window.__fs;
+    await fs.deleteDoc(fs.doc(window.__db, collection, id));
+  } else {
+    lsSave();
+  }
+}
+
+async function loadAllData() {
+  if (window.__useFirebase) {
+    const fs = window.__fs;
+    // Suscripciones en tiempo real
+    fs.onSnapshot(fs.collection(window.__db, 'players'), (snap) => {
+      STATE.players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      ensureDefaults();
+      renderAll();
+    });
+    fs.onSnapshot(fs.collection(window.__db, 'seasons'), (snap) => {
+      STATE.seasons = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      ensureSeason();
+      renderAll();
+    });
+    fs.onSnapshot(fs.collection(window.__db, 'matches'), (snap) => {
+      STATE.matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderAll();
+    });
+    fs.onSnapshot(fs.doc(window.__db, 'config', 'main'), (doc) => {
+      if (doc.exists()) STATE.config = { ...STATE.config, ...doc.data() };
+      renderAll();
+    });
+  } else {
+    const data = lsLoad();
+    STATE.players = data.players || [];
+    STATE.seasons = data.seasons || [];
+    STATE.matches = data.matches || [];
+    STATE.config = data.config || STATE.config;
+    ensureDefaults();
+    ensureSeason();
+    renderAll();
+  }
+}
+
+function ensureDefaults() {
+  // Si no hay jugadores, crear los 4 defaults
+  if (STATE.players.length === 0) {
+    DEFAULT_PLAYERS.forEach(async (p, i) => {
+      const id = 'p_' + p.name.toLowerCase();
+      const obj = { ...p, active: true, createdAt: Date.now() + i };
+      if (window.__useFirebase) {
+        await dbSet('players', id, obj);
+      } else {
+        STATE.players.push({ id, ...obj });
+      }
+    });
+    if (!window.__useFirebase) lsSave();
+  }
+}
+
+function ensureSeason() {
+  if (STATE.seasons.length === 0) {
+    const year = new Date().getFullYear();
+    const id = 's_' + year;
+    const obj = { name: 'Temporada ' + year, startDate: Date.now(), endDate: null, active: true };
+    if (window.__useFirebase) {
+      dbSet('seasons', id, obj);
+      dbSet('config', 'main', { currentSeasonId: id });
+    } else {
+      STATE.seasons.push({ id, ...obj });
+      STATE.config.currentSeasonId = id;
+      lsSave();
+    }
+  } else if (!STATE.config.currentSeasonId) {
+    const active = STATE.seasons.find(s => s.active) || STATE.seasons[0];
+    STATE.config.currentSeasonId = active.id;
+    if (window.__useFirebase) dbSet('config', 'main', { currentSeasonId: active.id });
+    else lsSave();
+  }
+}
+
+/* ==================================================================
+   UTILIDADES
+   ================================================================== */
+function genId(prefix) {
+  return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__toastT);
+  window.__toastT = setTimeout(() => t.classList.remove('show'), 2200);
+}
+function getPlayer(id) { return STATE.players.find(p => p.id === id); }
+function getPlayerName(id) { const p = getPlayer(id); return p ? p.name : '?'; }
+function fmtDate(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  if (isNaN(dt)) return d;
+  return dt.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+/* ==================================================================
+   NAVEGACIÓN
+   ================================================================== */
+document.querySelectorAll('nav.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-' + btn.dataset.view).classList.add('active');
+    window.scrollTo(0, 0);
+  });
+});
+
+/* ==================================================================
+   RENDER MAESTRO
+   ================================================================== */
+function renderAll() {
+  renderHeader();
+  renderPlayerSelector();
+  renderFijoSelectors();
+  renderLibreInputs();
+  renderAmericanaRounds();
+  renderFijoSets();
+  renderMatchHistory();
+  renderLeaderboard();
+  renderAdvStats();
+  renderPlayersList();
+  renderSeasons();
+  renderConfigInputs();
+  renderSeasonFilters();
+}
+
+function renderHeader() {
+  const s = STATE.seasons.find(s => s.id === STATE.config.currentSeasonId);
+  document.getElementById('currentSeasonBadge').textContent = s ? s.name : '—';
+}
+
+/* ==================================================================
+   SELECTOR DE MODALIDAD
+   ================================================================== */
+document.querySelectorAll('.modality-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.modality-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    STATE.currentModality = b.dataset.mod;
+    updateModalityBlocks();
+  });
+});
+
+function updateModalityBlocks() {
+  const m = STATE.currentModality;
+  document.getElementById('americanaBlock').style.display = (m === 'americana' || m === 'roundrobin') ? 'block' : 'none';
+  document.getElementById('fijoBlock').style.display = (m === 'fijo') ? 'block' : 'none';
+  document.getElementById('libreBlock').style.display = (m === 'libre') ? 'block' : 'none';
+  if (m === 'americana' || m === 'roundrobin') {
+    generateRounds();
+    renderAmericanaRounds();
+  }
+  if (m === 'libre') renderLibreInputs();
+}
+
+/* ==================================================================
+   SELECTOR DE JUGADORES
+   ================================================================== */
+function renderPlayerSelector() {
+  const c = document.getElementById('playerSelector');
+  if (!c) return;
+  c.innerHTML = '';
+  STATE.players.filter(p => p.active !== false).forEach(p => {
+    const sel = STATE.matchDraft.selectedPlayers.includes(p.id);
+    const chip = document.createElement('div');
+    chip.className = 'player-chip' + (sel ? ' selected' : '');
+    chip.innerHTML = `<span class="player-avatar" style="background:${p.color}">${p.emoji||p.name[0]}</span>${p.name}`;
+    chip.onclick = () => {
+      if (sel) {
+        STATE.matchDraft.selectedPlayers = STATE.matchDraft.selectedPlayers.filter(x => x !== p.id);
+      } else {
+        STATE.matchDraft.selectedPlayers.push(p.id);
+      }
+      renderPlayerSelector();
+      if (STATE.currentModality === 'americana' || STATE.currentModality === 'roundrobin') {
+        generateRounds();
+        renderAmericanaRounds();
+      }
+      if (STATE.currentModality === 'libre') renderLibreInputs();
+    };
+    c.appendChild(chip);
+  });
+}
+
+/* ==================================================================
+   MODALIDAD: AMERICANA / ROUND ROBIN
+   Genera rondas con todas las combinaciones posibles de parejas
+   Para 4 jugadores → 3 rondas (cada uno juega con cada uno como compañero)
+   ================================================================== */
+function generatePairings(playerIds) {
+  // Algoritmo: para cada jugador, rotar compañeros
+  // Para n par, hay n-1 rondas; cada ronda usa todos los jugadores
+  const n = playerIds.length;
+  if (n < 4 || n % 2 !== 0) return []; // requiere par y mínimo 4
+
+  // Round-robin scheduling (circle method)
+  const players = [...playerIds];
+  const rounds = [];
+  const fixed = players[0];
+  let rotating = players.slice(1);
+
+  const totalRounds = n - 1;
+  for (let r = 0; r < totalRounds; r++) {
+    const arr = [fixed, ...rotating];
+    // emparejamiento "diagonal" para que cada uno juegue con cada uno como compañero
+    // En cada ronda, partner del fijo cambia
+    const teamA = [arr[0], arr[1]];
+    const teamB = [arr[arr.length - 1], arr[arr.length - 2]];
+    // El resto va a las "otras canchas" — para una sola cancha por ronda esto basta
+    rounds.push({
+      teamA, teamB,
+      sets: [{a:'', b:''}]
+    });
+    // rotar
+    rotating = [rotating[rotating.length - 1], ...rotating.slice(0, -1)];
+  }
+  return rounds;
+}
+
+function generateRounds() {
+  const sel = STATE.matchDraft.selectedPlayers;
+  if (sel.length < 4) {
+    STATE.matchDraft.rounds = [];
+    return;
+  }
+  if (sel.length === 4) {
+    // 3 rondas: AB-CD, AC-BD, AD-BC
+    const [a,b,c,d] = sel;
+    STATE.matchDraft.rounds = [
+      { teamA:[a,b], teamB:[c,d], sets:[{a:'',b:''}] },
+      { teamA:[a,c], teamB:[b,d], sets:[{a:'',b:''}] },
+      { teamA:[a,d], teamB:[b,c], sets:[{a:'',b:''}] }
+    ];
+  } else {
+    STATE.matchDraft.rounds = generatePairings(sel);
+  }
+}
+
+function regenerateRounds() {
+  const sel = STATE.matchDraft.selectedPlayers;
+  // shuffle
+  const shuffled = [...sel].sort(() => Math.random() - 0.5);
+  STATE.matchDraft.selectedPlayers = shuffled;
+  generateRounds();
+  renderAmericanaRounds();
+  toast('🎲 Parejas re-generadas');
+}
+
+function renderAmericanaRounds() {
+  const c = document.getElementById('americanaRounds');
+  if (!c) return;
+  c.innerHTML = '';
+  if (STATE.matchDraft.rounds.length === 0) {
+    c.innerHTML = '<p style="color:var(--muted); font-size:0.85rem;">Seleccioná al menos 4 jugadores (cantidad par) para generar las rondas.</p>';
+    return;
+  }
+  STATE.matchDraft.rounds.forEach((r, idx) => {
+    const div = document.createElement('div');
+    div.className = 'round-card';
+    div.innerHTML = `
+      <div class="match-date">Ronda ${idx+1}</div>
+      <div class="team-row">
+        ${r.teamA.map(pid => playerChipHtml(pid)).join(' + ')}
+      </div>
+      <div class="vs">— vs —</div>
+      <div class="team-row">
+        ${r.teamB.map(pid => playerChipHtml(pid)).join(' + ')}
+      </div>
+      <h3 style="margin-top:8px;">Sets</h3>
+      <div id="roundSets_${idx}"></div>
+      <button class="btn-secondary btn-sm" onclick="addRoundSet(${idx})" style="margin-top:4px;">+ Set</button>
+    `;
+    c.appendChild(div);
+    renderRoundSets(idx);
+  });
+}
+
+function renderRoundSets(roundIdx) {
+  const c = document.getElementById('roundSets_' + roundIdx);
+  if (!c) return;
+  c.innerHTML = '';
+  const r = STATE.matchDraft.rounds[roundIdx];
+  r.sets.forEach((s, sIdx) => {
+    const row = document.createElement('div');
+    row.className = 'set-input';
+    row.innerHTML = `
+      <input type="number" min="0" max="20" value="${s.a}" placeholder="A" onchange="updateRoundSet(${roundIdx},${sIdx},'a',this.value)">
+      <span style="text-align:center; color:var(--muted);">-</span>
+      <input type="number" min="0" max="20" value="${s.b}" placeholder="B" onchange="updateRoundSet(${roundIdx},${sIdx},'b',this.value)">
+      <button class="btn-ghost btn-sm" onclick="removeRoundSet(${roundIdx},${sIdx})" title="quitar">✕</button>
+    `;
+    c.appendChild(row);
+  });
+}
+
+function updateRoundSet(rIdx, sIdx, key, val) {
+  STATE.matchDraft.rounds[rIdx].sets[sIdx][key] = val;
+}
+function addRoundSet(rIdx) {
+  STATE.matchDraft.rounds[rIdx].sets.push({a:'',b:''});
+  renderRoundSets(rIdx);
+}
+function removeRoundSet(rIdx, sIdx) {
+  if (STATE.matchDraft.rounds[rIdx].sets.length <= 1) return;
+  STATE.matchDraft.rounds[rIdx].sets.splice(sIdx, 1);
+  renderRoundSets(rIdx);
+}
+
+function playerChipHtml(pid) {
+  const p = getPlayer(pid);
+  if (!p) return '?';
+  return `<span class="player-chip selected"><span class="player-avatar" style="background:${p.color}">${p.emoji||p.name[0]}</span>${p.name}</span>`;
+}
+
+window.addRoundSet = addRoundSet;
+window.removeRoundSet = removeRoundSet;
+window.updateRoundSet = updateRoundSet;
+window.regenerateRounds = regenerateRounds;
+
+/* ==================================================================
+   MODALIDAD: PAREJA FIJA
+   ================================================================== */
+function renderFijoSelectors() {
+  ['teamASelector','teamBSelector'].forEach((id, idx) => {
+    const c = document.getElementById(id);
+    if (!c) return;
+    const teamKey = idx === 0 ? 'fijoTeamA' : 'fijoTeamB';
+    c.innerHTML = '';
+    STATE.players.filter(p => p.active !== false).forEach(p => {
+      const sel = STATE.matchDraft[teamKey].includes(p.id);
+      const otherTeam = idx === 0 ? 'fijoTeamB' : 'fijoTeamA';
+      const disabledByOther = STATE.matchDraft[otherTeam].includes(p.id);
+      const chip = document.createElement('div');
+      chip.className = 'player-chip' + (sel ? ' selected' : '');
+      chip.style.opacity = disabledByOther ? '0.3' : '1';
+      chip.innerHTML = `<span class="player-avatar" style="background:${p.color}">${p.emoji||p.name[0]}</span>${p.name}`;
+      chip.onclick = () => {
+        if (disabledByOther) return;
+        if (sel) {
+          STATE.matchDraft[teamKey] = STATE.matchDraft[teamKey].filter(x => x !== p.id);
+        } else {
+          if (STATE.matchDraft[teamKey].length >= 2) {
+            toast('Máximo 2 jugadores por equipo');
+            return;
+          }
+          STATE.matchDraft[teamKey].push(p.id);
+        }
+        renderFijoSelectors();
+      };
+      c.appendChild(chip);
+    });
+  });
+}
+
+function renderFijoSets() {
+  const c = document.getElementById('fijoSets');
+  if (!c) return;
+  c.innerHTML = '';
+  STATE.matchDraft.fijoSets.forEach((s, idx) => {
+    const row = document.createElement('div');
+    row.className = 'set-input';
+    row.innerHTML = `
+      <input type="number" min="0" max="20" value="${s.a}" placeholder="Equipo A" onchange="updateFijoSet(${idx},'a',this.value)">
+      <span style="text-align:center; color:var(--muted);">-</span>
+      <input type="number" min="0" max="20" value="${s.b}" placeholder="Equipo B" onchange="updateFijoSet(${idx},'b',this.value)">
+      <button class="btn-ghost btn-sm" onclick="removeFijoSet(${idx})" title="quitar">✕</button>
+    `;
+    c.appendChild(row);
+  });
+}
+function addFijoSet() {
+  STATE.matchDraft.fijoSets.push({a:'',b:''});
+  renderFijoSets();
+}
+function updateFijoSet(idx, key, val) {
+  STATE.matchDraft.fijoSets[idx][key] = val;
+}
+function removeFijoSet(idx) {
+  if (STATE.matchDraft.fijoSets.length <= 1) return;
+  STATE.matchDraft.fijoSets.splice(idx, 1);
+  renderFijoSets();
+}
+window.addFijoSet = addFijoSet;
+window.updateFijoSet = updateFijoSet;
+window.removeFijoSet = removeFijoSet;
+
+/* ==================================================================
+   MODALIDAD: LIBRE
+   ================================================================== */
+function renderLibreInputs() {
+  const c = document.getElementById('libreInputs');
+  if (!c) return;
+  c.innerHTML = '';
+  const sel = STATE.matchDraft.selectedPlayers;
+  if (sel.length === 0) {
+    c.innerHTML = '<p style="color:var(--muted); font-size:0.85rem;">Seleccioná los jugadores que participaron.</p>';
+    return;
+  }
+  c.innerHTML = `
+    <div style="font-size:0.75rem; color:var(--muted); margin-bottom:6px; display:grid; grid-template-columns: 1.2fr 1fr 1fr; gap:8px;">
+      <span>Jugador</span><span>Pts</span><span>Games G.</span>
+    </div>
+  `;
+  sel.forEach(pid => {
+    const p = getPlayer(pid);
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:8px; align-items:center; margin-bottom:8px;';
+    row.innerHTML = `
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span class="player-avatar" style="background:${p.color}">${p.emoji||p.name[0]}</span>
+        <b>${p.name}</b>
+      </div>
+      <input type="number" min="0" id="libre_pts_${pid}" placeholder="Pts">
+      <input type="number" min="0" id="libre_games_${pid}" placeholder="Games">
+    `;
+    c.appendChild(row);
+  });
+}
+
+/* ==================================================================
+   GUARDAR PARTIDO
+   ================================================================== */
+async function saveMatch() {
+  const date = document.getElementById('matchDate').value;
+  if (!date) { toast('Falta la fecha'); return; }
+
+  const m = STATE.currentModality;
+  const sel = STATE.matchDraft.selectedPlayers;
+
+  let match = {
+    date,
+    seasonId: STATE.config.currentSeasonId,
+    modality: m,
+    players: [],
+    rounds: [],
+    libreStats: null,
+    createdAt: Date.now()
+  };
+
+  if (m === 'americana' || m === 'roundrobin') {
+    if (sel.length < 4) { toast('Mínimo 4 jugadores'); return; }
+    match.players = sel;
+    match.rounds = STATE.matchDraft.rounds.map(r => ({
+      teamA: r.teamA,
+      teamB: r.teamB,
+      sets: r.sets.filter(s => s.a !== '' && s.b !== '').map(s => ({ a: +s.a, b: +s.b }))
+    })).filter(r => r.sets.length > 0);
+    if (match.rounds.length === 0) { toast('Ingresá al menos 1 set'); return; }
+  } else if (m === 'fijo') {
+    if (STATE.matchDraft.fijoTeamA.length !== 2 || STATE.matchDraft.fijoTeamB.length !== 2) {
+      toast('Necesitás 2 jugadores por equipo'); return;
+    }
+    match.players = [...STATE.matchDraft.fijoTeamA, ...STATE.matchDraft.fijoTeamB];
+    const sets = STATE.matchDraft.fijoSets.filter(s => s.a !== '' && s.b !== '').map(s => ({ a:+s.a, b:+s.b }));
+    if (sets.length === 0) { toast('Ingresá al menos 1 set'); return; }
+    match.rounds = [{
+      teamA: STATE.matchDraft.fijoTeamA,
+      teamB: STATE.matchDraft.fijoTeamB,
+      sets
+    }];
+  } else if (m === 'libre') {
+    if (sel.length === 0) { toast('Seleccioná jugadores'); return; }
+    match.players = sel;
+    match.libreStats = {};
+    sel.forEach(pid => {
+      const pts = parseInt(document.getElementById('libre_pts_'+pid)?.value || 0);
+      const games = parseInt(document.getElementById('libre_games_'+pid)?.value || 0);
+      match.libreStats[pid] = { pts, games };
+    });
+  }
+
+  // ID
+  const id = STATE.editingMatchId || genId('m');
+  await dbSet('matches', id, match);
+  if (!window.__useFirebase) {
+    const existing = STATE.matches.findIndex(x => x.id === id);
+    if (existing >= 0) STATE.matches[existing] = { id, ...match };
+    else STATE.matches.push({ id, ...match });
+    lsSave();
+    renderAll();
+  }
+
+  // Reset draft
+  STATE.matchDraft = {
+    selectedPlayers: [],
+    rounds: [],
+    fijoTeamA: [],
+    fijoTeamB: [],
+    fijoSets: [{a:'',b:''}]
+  };
+  STATE.editingMatchId = null;
+  document.querySelectorAll('input[type=number]').forEach(i => i.value = '');
+  renderPlayerSelector();
+  renderFijoSelectors();
+  renderFijoSets();
+  renderLibreInputs();
+  if (STATE.currentModality === 'americana' || STATE.currentModality === 'roundrobin') {
+    renderAmericanaRounds();
+  }
+  toast('✅ Partido guardado');
+  // Cambiar a vista historial
+  document.querySelector('nav.tabs button[data-view=history]').click();
+}
+window.saveMatch = saveMatch;
+
+/* ==================================================================
+   CÁLCULO DE PUNTOS Y STATS
+   ================================================================== */
+function computeRoundResult(round) {
+  // Cuenta sets ganados por cada equipo
+  let aSets = 0, bSets = 0;
+  round.sets.forEach(s => {
+    if (+s.a > +s.b) aSets++;
+    else if (+s.b > +s.a) bSets++;
+  });
+  return { aSets, bSets, winner: aSets > bSets ? 'A' : (bSets > aSets ? 'B' : 'tie') };
+}
+
+function computePlayerStatsForMatch(match) {
+  // Retorna { playerId: { pts, games, wins, plays, lost, ties } }
+  const stats = {};
+  match.players.forEach(pid => { stats[pid] = { pts:0, games:0, wins:0, lost:0, ties:0, plays:0 }; });
+
+  if (match.modality === 'libre') {
+    if (match.libreStats) {
+      Object.entries(match.libreStats).forEach(([pid, v]) => {
+        if (!stats[pid]) stats[pid] = { pts:0, games:0, wins:0, lost:0, ties:0, plays:0 };
+        stats[pid].pts += v.pts || 0;
+        stats[pid].games += v.games || 0;
+        stats[pid].plays += 1;
+      });
+    }
+    return stats;
+  }
+
+  // Americana / Round robin / Fijo: rondas con sets
+  match.rounds.forEach(r => {
+    const res = computeRoundResult(r);
+    let gamesA = 0, gamesB = 0;
+    r.sets.forEach(s => { gamesA += +s.a; gamesB += +s.b; });
+
+    r.teamA.forEach(pid => {
+      if (!stats[pid]) stats[pid] = { pts:0, games:0, wins:0, lost:0, ties:0, plays:0 };
+      stats[pid].plays += 1;
+      stats[pid].games += gamesA;
+      if (res.winner === 'A') { stats[pid].wins += 1; stats[pid].pts += STATE.config.pointsWin; }
+      else if (res.winner === 'B') { stats[pid].lost += 1; stats[pid].pts += STATE.config.pointsLoss; }
+      else { stats[pid].ties += 1; stats[pid].pts += STATE.config.pointsTie; }
+    });
+    r.teamB.forEach(pid => {
+      if (!stats[pid]) stats[pid] = { pts:0, games:0, wins:0, lost:0, ties:0, plays:0 };
+      stats[pid].plays += 1;
+      stats[pid].games += gamesB;
+      if (res.winner === 'B') { stats[pid].wins += 1; stats[pid].pts += STATE.config.pointsWin; }
+      else if (res.winner === 'A') { stats[pid].lost += 1; stats[pid].pts += STATE.config.pointsLoss; }
+      else { stats[pid].ties += 1; stats[pid].pts += STATE.config.pointsTie; }
+    });
+  });
+  return stats;
+}
+
+function aggregateStats(seasonId) {
+  const agg = {};
+  STATE.players.forEach(p => { agg[p.id] = { ...p, pts:0, games:0, wins:0, lost:0, ties:0, plays:0 }; });
+  STATE.matches.forEach(m => {
+    if (seasonId && seasonId !== 'all' && m.seasonId !== seasonId) return;
+    const ms = computePlayerStatsForMatch(m);
+    Object.entries(ms).forEach(([pid, v]) => {
+      if (!agg[pid]) {
+        const p = getPlayer(pid) || { name:'?', color:'#999', emoji:'?' };
+        agg[pid] = { ...p, id:pid, pts:0, games:0, wins:0, lost:0, ties:0, plays:0 };
+      }
+      agg[pid].pts += v.pts;
+      agg[pid].games += v.games;
+      agg[pid].wins += v.wins;
+      agg[pid].lost += v.lost;
+      agg[pid].ties += v.ties;
+      agg[pid].plays += v.plays;
+    });
+  });
+  return Object.values(agg);
+}
+
+/* ==================================================================
+   HISTORIAL
+   ================================================================== */
+function renderMatchHistory() {
+  const c = document.getElementById('matchHistory');
+  if (!c) return;
+  const filter = document.getElementById('historyFilter')?.value || 'all';
+  let matches = [...STATE.matches];
+  if (filter !== 'all') matches = matches.filter(m => m.seasonId === filter);
+  matches.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+  if (matches.length === 0) {
+    c.innerHTML = '<div class="empty">No hay partidos cargados todavía 🎾</div>';
+    return;
+  }
+
+  c.innerHTML = '';
+  matches.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'match-card';
+    let content = '';
+    if (m.modality === 'libre') {
+      const players = (m.players || []).map(pid => {
+        const stats = m.libreStats?.[pid] || {pts:0,games:0};
+        return `${getPlayerName(pid)}: ${stats.pts}pts / ${stats.games}g`;
+      }).join(' · ');
+      content = players;
+    } else {
+      const sets = (m.rounds || []).map((r, i) => {
+        const res = computeRoundResult(r);
+        const aNames = r.teamA.map(getPlayerName).join('+');
+        const bNames = r.teamB.map(getPlayerName).join('+');
+        const setsStr = r.sets.map(s => `${s.a}-${s.b}`).join(', ');
+        const winBadge = res.winner === 'A' ? `<span class="winner-badge">${aNames}</span>` :
+                         res.winner === 'B' ? `<span class="winner-badge">${bNames}</span>` : '';
+        return `<div style="margin:4px 0;">R${i+1}: <b>${aNames}</b> vs <b>${bNames}</b> → ${setsStr} ${winBadge}</div>`;
+      }).join('');
+      content = sets;
+    }
+    const modLabel = { americana:'Americana', fijo:'Pareja Fija', roundrobin:'Round Robin', libre:'Libre' }[m.modality] || m.modality;
+    card.innerHTML = `
+      <div>
+        <span class="match-date">${fmtDate(m.date)}</span>
+        <span class="match-modality">${modLabel}</span>
+      </div>
+      <div class="match-content">${content}</div>
+      <div class="match-actions">
+        <button class="btn-ghost btn-sm" onclick="editMatch('${m.id}')">✏️ Editar</button>
+        <button class="btn-danger btn-sm" onclick="deleteMatch('${m.id}')">🗑️</button>
+      </div>
+    `;
+    c.appendChild(card);
+  });
+}
+
+async function deleteMatch(id) {
+  if (!confirm('¿Borrar este partido?')) return;
+  await dbDelete('matches', id);
+  if (!window.__useFirebase) {
+    STATE.matches = STATE.matches.filter(m => m.id !== id);
+    lsSave();
+    renderAll();
+  }
+  toast('🗑️ Partido borrado');
+}
+window.deleteMatch = deleteMatch;
+
+function editMatch(id) {
+  const m = STATE.matches.find(x => x.id === id);
+  if (!m) return;
+  STATE.editingMatchId = id;
+  STATE.currentModality = m.modality;
+  document.querySelectorAll('.modality-btn').forEach(x => x.classList.toggle('active', x.dataset.mod === m.modality));
+  document.getElementById('matchDate').value = m.date;
+  STATE.matchDraft.selectedPlayers = [...(m.players || [])];
+
+  if (m.modality === 'libre') {
+    renderPlayerSelector();
+    renderLibreInputs();
+    setTimeout(() => {
+      Object.entries(m.libreStats || {}).forEach(([pid, v]) => {
+        const pInp = document.getElementById('libre_pts_'+pid);
+        const gInp = document.getElementById('libre_games_'+pid);
+        if (pInp) pInp.value = v.pts;
+        if (gInp) gInp.value = v.games;
+      });
+    }, 50);
+  } else if (m.modality === 'fijo') {
+    STATE.matchDraft.fijoTeamA = m.rounds[0]?.teamA || [];
+    STATE.matchDraft.fijoTeamB = m.rounds[0]?.teamB || [];
+    STATE.matchDraft.fijoSets = (m.rounds[0]?.sets || [{a:'',b:''}]).map(s => ({a:s.a, b:s.b}));
+    renderFijoSelectors();
+    renderFijoSets();
+  } else {
+    STATE.matchDraft.rounds = (m.rounds || []).map(r => ({
+      teamA: [...r.teamA], teamB: [...r.teamB],
+      sets: r.sets.map(s => ({a:s.a, b:s.b}))
+    }));
+    renderPlayerSelector();
+    renderAmericanaRounds();
+  }
+  updateModalityBlocks();
+  document.querySelector('nav.tabs button[data-view=new]').click();
+  toast('✏️ Editando partido');
+}
+window.editMatch = editMatch;
+
+/* ==================================================================
+   LEADERBOARD + STATS AVANZADAS
+   ================================================================== */
+function renderLeaderboard() {
+  const tbody = document.querySelector('#leaderboard tbody');
+  if (!tbody) return;
+  const filter = document.getElementById('statsFilter')?.value || STATE.config.currentSeasonId || 'all';
+  let arr = aggregateStats(filter);
+  arr = arr.filter(p => p.plays > 0 || (p.active !== false));
+  arr.sort((a,b) => b.pts - a.pts || b.wins - a.wins || b.games - a.games);
+  tbody.innerHTML = '';
+  arr.forEach((p, idx) => {
+    const winPct = p.plays > 0 ? Math.round((p.wins / p.plays) * 100) : 0;
+    const tr = document.createElement('tr');
+    if (idx < 3 && p.plays > 0) tr.className = 'position-' + (idx+1);
+    tr.innerHTML = `
+      <td>${idx+1}</td>
+      <td>
+        <span style="display:inline-flex;align-items:center;gap:6px;">
+          <span class="player-avatar" style="background:${p.color}">${p.emoji||p.name[0]}</span>
+          <b>${p.name}</b>
+        </span>
+      </td>
+      <td class="num">${p.plays}</td>
+      <td class="num">${p.wins}</td>
+      <td class="num"><b>${p.pts}</b></td>
+      <td class="num">${winPct}%</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  if (arr.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin datos todavía</td></tr>';
+  }
+}
+
+function renderAdvStats() {
+  const c = document.getElementById('advStats');
+  if (!c) return;
+  const filter = document.getElementById('statsFilter')?.value || STATE.config.currentSeasonId || 'all';
+  const matches = STATE.matches.filter(m => filter === 'all' || m.seasonId === filter);
+
+  if (matches.length === 0) {
+    c.innerHTML = '<div class="empty">Sin datos. Cargá tu primer partido.</div>';
+    return;
+  }
+
+  // Total partidos, total games, partidos por modalidad
+  let totalSets = 0, totalGames = 0;
+  const byModality = { americana:0, fijo:0, roundrobin:0, libre:0 };
+  matches.forEach(m => {
+    byModality[m.modality] = (byModality[m.modality]||0) + 1;
+    (m.rounds||[]).forEach(r => {
+      totalSets += r.sets.length;
+      r.sets.forEach(s => { totalGames += (+s.a||0) + (+s.b||0); });
+    });
+  });
+
+  // Por jugador
+  const adv = {};
+  STATE.players.forEach(p => {
+    adv[p.id] = {
+      ...p,
+      partners: {},  // partnerId -> {wins, plays}
+      rivals: {},
+      streak: 0
+    };
+  });
+
+  const sortedMatches = [...matches].sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  sortedMatches.forEach(m => {
+    if (m.modality === 'libre') return;
+    m.rounds.forEach(r => {
+      const res = computeRoundResult(r);
+      const teamAWon = res.winner === 'A';
+      const teamBWon = res.winner === 'B';
+      // partners team A
+      r.teamA.forEach(pid => {
+        r.teamA.forEach(qid => {
+          if (qid === pid || !adv[pid]) return;
+          if (!adv[pid].partners[qid]) adv[pid].partners[qid] = { wins:0, plays:0 };
+          adv[pid].partners[qid].plays += 1;
+          if (teamAWon) adv[pid].partners[qid].wins += 1;
+        });
+        r.teamB.forEach(rid => {
+          if (!adv[pid]) return;
+          if (!adv[pid].rivals[rid]) adv[pid].rivals[rid] = { wins:0, plays:0 };
+          adv[pid].rivals[rid].plays += 1;
+          if (teamAWon) adv[pid].rivals[rid].wins += 1;
+        });
+      });
+      r.teamB.forEach(pid => {
+        r.teamB.forEach(qid => {
+          if (qid === pid || !adv[pid]) return;
+          if (!adv[pid].partners[qid]) adv[pid].partners[qid] = { wins:0, plays:0 };
+          adv[pid].partners[qid].plays += 1;
+          if (teamBWon) adv[pid].partners[qid].wins += 1;
+        });
+        r.teamA.forEach(rid => {
+          if (!adv[pid]) return;
+          if (!adv[pid].rivals[rid]) adv[pid].rivals[rid] = { wins:0, plays:0 };
+          adv[pid].rivals[rid].plays += 1;
+          if (teamBWon) adv[pid].rivals[rid].wins += 1;
+        });
+      });
+    });
+  });
+
+  let html = `
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-value">${matches.length}</div><div class="stat-label">Partidos jugados</div></div>
+      <div class="stat-box"><div class="stat-value">${totalSets}</div><div class="stat-label">Sets jugados</div></div>
+      <div class="stat-box"><div class="stat-value">${totalGames}</div><div class="stat-label">Games totales</div></div>
+      <div class="stat-box"><div class="stat-value">${byModality.americana||0}</div><div class="stat-label">Americanas</div></div>
+    </div>
+    <h3 style="margin-top:18px;">Por jugador</h3>
+  `;
+
+  STATE.players.forEach(p => {
+    const data = adv[p.id];
+    if (!data) return;
+    const partners = Object.entries(data.partners)
+      .filter(([,v]) => v.plays > 0)
+      .map(([pid, v]) => ({ pid, name: getPlayerName(pid), wins:v.wins, plays:v.plays, pct: Math.round(v.wins/v.plays*100) }))
+      .sort((a,b) => b.pct - a.pct);
+    const rivals = Object.entries(data.rivals)
+      .filter(([,v]) => v.plays > 0)
+      .map(([pid, v]) => ({ pid, name: getPlayerName(pid), wins:v.wins, plays:v.plays, pct: Math.round(v.wins/v.plays*100) }))
+      .sort((a,b) => a.pct - b.pct);
+
+    const bestPartner = partners[0];
+    const worstPartner = partners[partners.length - 1];
+    const hardestRival = rivals[0];
+
+    if (partners.length === 0 && rivals.length === 0) return;
+
+    html += `
+      <details>
+        <summary>
+          <span class="player-avatar" style="background:${p.color}; display:inline-flex; vertical-align:middle;">${p.emoji||p.name[0]}</span>
+          ${p.name}
+        </summary>
+        <div style="margin-top:10px; font-size:0.85rem;">
+          ${bestPartner ? `🤝 Mejor compañero: <b>${bestPartner.name}</b> (${bestPartner.wins}/${bestPartner.plays}, ${bestPartner.pct}%)<br>` : ''}
+          ${worstPartner && worstPartner !== bestPartner ? `😬 Peor compañero: <b>${worstPartner.name}</b> (${worstPartner.wins}/${worstPartner.plays}, ${worstPartner.pct}%)<br>` : ''}
+          ${hardestRival ? `🔥 Rival más difícil: <b>${hardestRival.name}</b> (le ganó ${hardestRival.wins}/${hardestRival.plays}, ${hardestRival.pct}%)` : ''}
+        </div>
+      </details>
+    `;
+  });
+
+  c.innerHTML = html;
+}
+
+/* ==================================================================
+   JUGADORES (CRUD)
+   ================================================================== */
+function renderPlayersList() {
+  const c = document.getElementById('playersList');
+  if (!c) return;
+  c.innerHTML = '';
+  STATE.players.forEach(p => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid var(--border);';
+    div.innerHTML = `
+      <span class="player-avatar" style="background:${p.color}; width:36px; height:36px; font-size:1.2rem;">${p.emoji||p.name[0]}</span>
+      <div style="flex:1;">
+        <b>${p.name}</b>
+        ${p.active === false ? '<span style="font-size:0.75rem; color:var(--muted);"> · inactivo</span>' : ''}
+      </div>
+      <button class="btn-ghost btn-sm" onclick="editPlayer('${p.id}')">✏️</button>
+      <button class="btn-danger btn-sm" onclick="togglePlayer('${p.id}')">${p.active === false ? '✓' : '✕'}</button>
+    `;
+    c.appendChild(div);
+  });
+}
+
+async function addPlayer() {
+  const name = document.getElementById('newPlayerName').value.trim();
+  const emoji = document.getElementById('newPlayerEmoji').value.trim();
+  const color = document.getElementById('newPlayerColor').value;
+  if (!name) { toast('Falta el apodo'); return; }
+  const id = genId('p');
+  const obj = { name, emoji: emoji || name[0].toUpperCase(), color, active: true, createdAt: Date.now() };
+  await dbSet('players', id, obj);
+  if (!window.__useFirebase) {
+    STATE.players.push({ id, ...obj });
+    lsSave();
+    renderAll();
+  }
+  document.getElementById('newPlayerName').value = '';
+  document.getElementById('newPlayerEmoji').value = '';
+  toast('✅ Jugador agregado');
+}
+window.addPlayer = addPlayer;
+
+async function editPlayer(id) {
+  const p = getPlayer(id);
+  if (!p) return;
+  const name = prompt('Nuevo apodo:', p.name);
+  if (!name) return;
+  const emoji = prompt('Nuevo emoji:', p.emoji || '');
+  const obj = { ...p, name, emoji };
+  delete obj.id;
+  await dbSet('players', id, obj);
+  if (!window.__useFirebase) {
+    Object.assign(p, obj);
+    lsSave();
+    renderAll();
+  }
+  toast('✅ Actualizado');
+}
+window.editPlayer = editPlayer;
+
+async function togglePlayer(id) {
+  const p = getPlayer(id);
+  if (!p) return;
+  const newActive = p.active === false ? true : false;
+  const obj = { ...p, active: newActive };
+  delete obj.id;
+  await dbSet('players', id, obj);
+  if (!window.__useFirebase) {
+    p.active = newActive;
+    lsSave();
+    renderAll();
+  }
+  toast(newActive ? 'Reactivado' : 'Desactivado');
+}
+window.togglePlayer = togglePlayer;
+
+/* ==================================================================
+   TEMPORADAS
+   ================================================================== */
+function renderSeasons() {
+  const c = document.getElementById('seasonsList');
+  const sel = document.getElementById('activeSeasonSelect');
+  if (!c || !sel) return;
+  c.innerHTML = '';
+  sel.innerHTML = '';
+  STATE.seasons.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name + (s.active === false ? ' (cerrada)' : '');
+    if (s.id === STATE.config.currentSeasonId) opt.selected = true;
+    sel.appendChild(opt);
+
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex; align-items:center; gap:8px; padding:8px; border-bottom:1px solid var(--border); font-size:0.9rem;';
+    div.innerHTML = `
+      <div style="flex:1;">
+        <b>${s.name}</b>
+        ${s.active === false ? '<span style="font-size:0.75rem; color:var(--muted);"> · cerrada</span>' : ''}
+      </div>
+      <button class="btn-ghost btn-sm" onclick="toggleSeason('${s.id}')">${s.active === false ? 'Reabrir' : 'Cerrar'}</button>
+      <button class="btn-danger btn-sm" onclick="deleteSeason('${s.id}')">🗑️</button>
+    `;
+    c.appendChild(div);
+  });
+  sel.onchange = () => {
+    STATE.config.currentSeasonId = sel.value;
+    saveConfig();
+  };
+}
+
+async function addSeason() {
+  const name = document.getElementById('newSeasonName').value.trim();
+  if (!name) { toast('Falta nombre'); return; }
+  const id = genId('s');
+  const obj = { name, startDate: Date.now(), endDate: null, active: true };
+  await dbSet('seasons', id, obj);
+  if (!window.__useFirebase) {
+    STATE.seasons.push({ id, ...obj });
+    lsSave();
+  }
+  document.getElementById('newSeasonName').value = '';
+  STATE.config.currentSeasonId = id;
+  await dbSet('config', 'main', STATE.config);
+  if (!window.__useFirebase) { lsSave(); renderAll(); }
+  toast('✅ Temporada creada');
+}
+window.addSeason = addSeason;
+
+async function toggleSeason(id) {
+  const s = STATE.seasons.find(x => x.id === id);
+  if (!s) return;
+  const newActive = s.active === false ? true : false;
+  const obj = { ...s, active: newActive, endDate: newActive ? null : Date.now() };
+  delete obj.id;
+  await dbSet('seasons', id, obj);
+  if (!window.__useFirebase) {
+    s.active = newActive;
+    s.endDate = obj.endDate;
+    lsSave();
+    renderAll();
+  }
+}
+window.toggleSeason = toggleSeason;
+
+async function deleteSeason(id) {
+  if (!confirm('¿Borrar esta temporada? Los partidos asociados quedarán "huérfanos".')) return;
+  await dbDelete('seasons', id);
+  if (!window.__useFirebase) {
+    STATE.seasons = STATE.seasons.filter(s => s.id !== id);
+    if (STATE.config.currentSeasonId === id) {
+      STATE.config.currentSeasonId = STATE.seasons[0]?.id || null;
+    }
+    lsSave();
+    renderAll();
+  }
+}
+window.deleteSeason = deleteSeason;
+
+function renderSeasonFilters() {
+  ['historyFilter','statsFilter'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const prev = sel.value;
+    sel.innerHTML = '<option value="all">— Todas las temporadas —</option>';
+    STATE.seasons.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = s.name;
+      sel.appendChild(opt);
+    });
+    if (id === 'statsFilter' && !prev) sel.value = STATE.config.currentSeasonId || 'all';
+    else if (prev) sel.value = prev;
+    sel.onchange = () => { renderMatchHistory(); renderLeaderboard(); renderAdvStats(); };
+  });
+}
+
+/* ==================================================================
+   CONFIG
+   ================================================================== */
+function renderConfigInputs() {
+  document.getElementById('pointsWin').value = STATE.config.pointsWin;
+  document.getElementById('pointsTie').value = STATE.config.pointsTie;
+  document.getElementById('pointsLoss').value = STATE.config.pointsLoss;
+}
+
+async function saveConfig() {
+  STATE.config.pointsWin = +document.getElementById('pointsWin').value || 0;
+  STATE.config.pointsTie = +document.getElementById('pointsTie').value || 0;
+  STATE.config.pointsLoss = +document.getElementById('pointsLoss').value || 0;
+  await dbSet('config', 'main', STATE.config);
+  if (!window.__useFirebase) lsSave();
+  renderAll();
+  toast('✅ Config guardada');
+}
+window.saveConfig = saveConfig;
+
+/* ==================================================================
+   IMPORTAR / EXPORTAR / RESET
+   ================================================================== */
+function exportData() {
+  const data = {
+    players: STATE.players,
+    seasons: STATE.seasons,
+    matches: STATE.matches,
+    config: STATE.config,
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `padel-backup-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📥 Exportado');
+}
+window.exportData = exportData;
+
+function importData(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = async () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (!confirm('Importar reemplazará tus datos actuales. ¿Continuar?')) return;
+      if (window.__useFirebase) {
+        // Subir a Firestore
+        for (const p of (data.players||[])) { const id = p.id; const obj = {...p}; delete obj.id; await dbSet('players', id, obj); }
+        for (const s of (data.seasons||[])) { const id = s.id; const obj = {...s}; delete obj.id; await dbSet('seasons', id, obj); }
+        for (const m of (data.matches||[])) { const id = m.id; const obj = {...m}; delete obj.id; await dbSet('matches', id, obj); }
+        if (data.config) await dbSet('config', 'main', data.config);
+      } else {
+        STATE.players = data.players || [];
+        STATE.seasons = data.seasons || [];
+        STATE.matches = data.matches || [];
+        STATE.config = { ...STATE.config, ...(data.config||{}) };
+        lsSave();
+        renderAll();
+      }
+      toast('✅ Importado');
+    } catch (err) {
+      alert('Error al importar: ' + err.message);
+    }
+  };
+  r.readAsText(f);
+}
+window.importData = importData;
+
+async function clearAll() {
+  if (!confirm('⚠️ Borrar TODOS los datos? Esto incluye jugadores, partidos, temporadas y config.')) return;
+  if (!confirm('¿Estás 100% seguro? No se puede deshacer.')) return;
+  if (window.__useFirebase) {
+    const fs = window.__fs;
+    for (const m of STATE.matches) await dbDelete('matches', m.id);
+    for (const s of STATE.seasons) await dbDelete('seasons', s.id);
+    for (const p of STATE.players) await dbDelete('players', p.id);
+    await dbDelete('config', 'main');
+  } else {
+    localStorage.removeItem(LS_KEY);
+    STATE.players = []; STATE.seasons = []; STATE.matches = [];
+    STATE.config = { pointsWin:3, pointsTie:1, pointsLoss:0, currentSeasonId:null };
+    ensureDefaults();
+    ensureSeason();
+    renderAll();
+  }
+  toast('🗑️ Borrado');
+}
+window.clearAll = clearAll;
+
+/* ==================================================================
+   INICIALIZACIÓN
+   ================================================================== */
+function initApp() {
+  document.getElementById('matchDate').valueAsDate = new Date();
+  loadAllData();
+}
+
+window.addEventListener('firebaseReady', initApp);
+// Fallback si el módulo Firebase tarda
+setTimeout(() => { if (!window.__appStarted) { window.__appStarted = true; initApp(); } }, 500);
+</script>
+
+</body>
+</html>
