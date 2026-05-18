@@ -1,0 +1,30 @@
+{
+  "matches": [
+    {
+      "id": "m_2026_05_11",
+      "date": "2026-05-11",
+      "seasonId": "s_2026",
+      "modality": "americana",
+      "players": ["p_uriel", "p_pato", "p_nico", "p_chuqui"],
+      "rounds": [
+        {
+          "teamA": ["p_uriel", "p_pato"],
+          "teamB": ["p_nico", "p_chuqui"],
+          "sets": [{"a": 12, "b": 1}]
+        },
+        {
+          "teamA": ["p_uriel", "p_nico"],
+          "teamB": ["p_pato", "p_chuqui"],
+          "sets": [{"a": 9, "b": 5}]
+        },
+        {
+          "teamA": ["p_uriel", "p_chuqui"],
+          "teamB": ["p_pato", "p_nico"],
+          "sets": [{"a": 12, "b": 1}]
+        }
+      ],
+      "libreStats": null,
+      "createdAt": 1778457600000
+    }
+  ]
+}
