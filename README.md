@@ -4,28 +4,28 @@ App web para llevar el registro de los partidos de pádel con tus amigos. Soport
 
 ## 🚀 Probarla ya mismo (modo local)
 
-Abrí `index.html` directamente en el navegador. Funciona offline guardando todo en `localStorage` (sirve si una sola persona lleva el registro). Para que **todos puedan cargar resultados desde su celular** y verlo sincronizado, seguí los pasos de Firebase abajo.
+Abre `index.html` directamente en el navegador. Funciona offline guardando todo en `localStorage` (sirve si una sola persona lleva el registro). Para que **todos puedan cargar resultados desde su celular** y verlo sincronizado, sigue los pasos de Firebase abajo.
 
 ## ☁️ Setup de Firebase (5 minutos, gratis)
 
 ### 1) Crear proyecto en Firebase
 
-1. Andá a [console.firebase.google.com](https://console.firebase.google.com/) e iniciá sesión con tu cuenta de Google.
+1. Anda a [console.firebase.google.com](https://console.firebase.google.com/) e inicia sesión con tu cuenta de Google.
 2. Click en **"Agregar proyecto"** (o "Add project").
-3. Nombre del proyecto: `padel-lunes` (o lo que quieras). Aceptá los términos. Podés saltar Google Analytics.
-4. Esperá a que se cree (~30 segundos).
+3. Nombre del proyecto: `padel-lunes` (o lo que quieras). Acepta los términos. Puedes saltar Google Analytics.
+4. Espera a que se cree (~30 segundos).
 
 ### 2) Activar Firestore Database
 
-1. En el menú izquierdo, click en **"Build" → "Firestore Database"**.
+1. En el menú izquierdo, click en **"Databases & Storage" → "Firestore Database"**.
 2. Click en **"Crear base de datos"**.
-3. Elegí **"Iniciar en modo de prueba"** (modo abierto por 30 días).
-4. Elegí la ubicación más cercana: `southamerica-east1` (São Paulo) o `us-east1`. Confirmá.
+3. Elige **"Iniciar en modo de prueba"** (modo abierto por 30 días).
+4. Elige la ubicación más cercana: `southamerica-west1` (Santiago) o `southamerica-east1` (São Paulo). Confirma.
 
 ### 3) Reglas de Firestore (acceso abierto permanente)
 
-1. Dentro de Firestore, andá a la pestaña **"Reglas"** (Rules).
-2. Reemplazá el contenido por esto y publicá:
+1. Dentro de Firestore, anda a la pestaña **"Reglas"** (Rules).
+2. Reemplaza el contenido por esto y publica:
 
 ```
 rules_version = '2';
@@ -38,14 +38,14 @@ service cloud.firestore {
 }
 ```
 
-> ⚠️ Esto deja la base **completamente abierta**: cualquiera con tu URL pública podría leer/escribir. Como acordamos, está OK para una app personal de 4 amigos. Si querés más seguridad después, podés agregar un PIN simple.
+> ⚠️ Esto deja la base **completamente abierta**: cualquiera con tu URL pública podría leer/escribir. Como acordamos, está OK para una app personal de 4 amigos. Si quieres más seguridad después, puedes agregar un PIN simple.
 
 ### 4) Obtener credenciales de tu app web
 
 1. En el panel principal de Firebase, click en el ícono de **engranaje ⚙️ → "Configuración del proyecto"**.
 2. Scroll abajo hasta **"Tus apps"** → click en el ícono **`</>`** (Web).
 3. Apodo: `padel-web`. **NO** marques "Firebase Hosting". Click "Registrar app".
-4. Te aparece un bloque de código con un objeto `firebaseConfig`. Copialo entero.
+4. Te aparece un bloque de código con un objeto `firebaseConfig`. Cópialo entero.
 
 Se ve así:
 ```javascript
@@ -61,9 +61,9 @@ const firebaseConfig = {
 
 ### 5) Pegar credenciales en la app
 
-1. Abrí `index.html` en un editor de texto.
-2. Buscá `FIREBASE_CONFIG` (está cerca de la línea ~540, dentro del primer `<script type="module">`).
-3. Reemplazá el bloque vacío `{ }` con tu objeto, **descomentando las líneas**:
+1. Abre `index.html` en un editor de texto.
+2. Busca `FIREBASE_CONFIG` (está cerca de la línea ~670, dentro del primer `<script type="module">`).
+3. Reemplaza el bloque vacío `{ }` con tu objeto, **descomentando las líneas**:
 
 ```javascript
 const FIREBASE_CONFIG = {
@@ -76,18 +76,18 @@ const FIREBASE_CONFIG = {
 };
 ```
 
-4. Guardá el archivo. Abrilo en el navegador: arriba en la barra debería decir "🟢 Firebase conectado" si vas a la pestaña Config.
+4. Guarda el archivo. Ábrelo en el navegador: arriba en la barra debería decir "🟢 Firebase conectado" si vas a la pestaña Config.
 
 ## 🌐 Publicar en GitHub Pages
 
 ### Opción A — Sencilla (drag & drop)
 
-1. Creá un repo nuevo en GitHub, por ejemplo `padel-lunes`.
-2. Subí `index.html` y `README.md` al repo (drag & drop o `git push`).
-3. En GitHub, andá a **Settings → Pages**.
-4. En "Source", elegí **branch: main** y carpeta **/(root)**. Guardá.
-5. Esperá 1-2 minutos. Tu app estará en: `https://TU-USUARIO.github.io/padel-lunes/`
-6. Compartí el link con Chuqui, Nico y Uri.
+1. Crea un repo nuevo en GitHub, por ejemplo `padel-lunes`.
+2. Sube `index.html` y `README.md` al repo (drag & drop o `git push`).
+3. En GitHub, anda a **Settings → Pages**.
+4. En "Source", elige **branch: main** y carpeta **/(root)**. Guarda.
+5. Espera 1-2 minutos. Tu app estará en: `https://TU-USUARIO.github.io/padel-lunes/`
+6. Comparte el link con Chuqui, Nico y Uri.
 
 ### Opción B — Por línea de comandos
 
@@ -99,7 +99,7 @@ git commit -m "Padel app inicial"
 git branch -M main
 git remote add origin https://github.com/TU-USUARIO/padel-lunes.git
 git push -u origin main
-# Luego activá GitHub Pages como en Opción A.
+# Luego activa GitHub Pages como en Opción A.
 ```
 
 ## 📱 Cómo usarla
@@ -107,18 +107,18 @@ git push -u origin main
 ### Cargar un partido
 
 1. **Cargar** (tab inferior).
-2. Elegí la **modalidad**:
+2. Elige la **modalidad**:
    - **Americana** 🔄: rotan compañeros. Para 4 jugadores arma 3 rondas (cada uno juega con cada uno como pareja).
    - **Pareja Fija** ⚔️: dos parejas fijas, varios sets.
    - **Round Robin** 🎯: similar a Americana, todas las combinaciones.
-   - **Libre** 📝: solo cargás puntos/games totales por jugador.
-3. Tocá los chips de los jugadores que participaron.
-4. Cargá los resultados set por set.
+   - **Libre** 📝: solo cargas puntos/games totales por jugador.
+3. Toca los chips de los jugadores que participaron.
+4. Carga los resultados set por set.
 5. **💾 Guardar Partido**.
 
 ### Tip: re-generar parejas
 
-En Americana podés tocar **🎲 Re-generar parejas** para randomizar el orden si querés.
+En Americana puedes tocar **🎲 Re-generar parejas** para randomizar el orden si quieres.
 
 ### Estadísticas
 
@@ -130,9 +130,20 @@ La pestaña **🏆 Stats** muestra la tabla histórica de la temporada activa, c
 
 Más abajo: stats avanzadas por jugador — mejor compañero, peor compañero, rival más difícil.
 
+### Análisis Avanzado
+
+La pestaña **📈 Análisis** trae el set completo de stats nerd:
+- **ELO Ranking** + evolución temporal (line chart)
+- **Matriz de Compañeros** (heatmap de W%)
+- **Evolución de Puntos Acumulados** (line chart)
+- **Distribución de Margen de Games** (bar chart con μ, σ, min, max, n)
+- **Forma Reciente** y rachas (V/E/D últimos 5)
+- **Performance vs Expected** (under/over performer según ELO)
+- **Predictor de Partidos** (probabilidad 2v2 según ELO)
+
 ### Temporadas
 
-En **⚙️ Config** podés crear nuevas temporadas, cerrar la actual, y filtrar las stats por temporada en el dropdown.
+En **⚙️ Config** puedes crear nuevas temporadas, cerrar la actual, y filtrar las stats por temporada en el dropdown.
 
 ### Backup
 
@@ -140,8 +151,8 @@ Botón **⬇️ Exportar datos** descarga un JSON con todo. **⬆️ Importar** 
 
 ## 🛠️ Modificar / extender
 
-- Es un solo archivo HTML con todo dentro (CSS + JS). Sin build, sin dependencias instaladas.
-- Si querés agregar funcionalidades pedímelo y lo modifico.
+- Es un solo archivo HTML con todo dentro (CSS + JS) + Chart.js cargado vía CDN. Sin build, sin dependencias instaladas.
+- Si quieres agregar funcionalidades pídemelo y lo modifico.
 
 ## 📁 Estructura de datos en Firestore
 

@@ -412,7 +412,7 @@
 
 <main>
   <div id="firebaseWarn" class="warn-banner" style="display:none;">
-    ⚠️ Configurá tus credenciales de Firebase en el código (busca <code>FIREBASE_CONFIG</code>) o usa el modo local. Mientras tanto la app funciona offline en tu navegador.
+    ⚠️ Configura tus credenciales de Firebase en el código (busca <code>FIREBASE_CONFIG</code>) o usa el modo local. Mientras tanto la app funciona offline en tu navegador.
   </div>
 
   <!-- ============ VIEW: CARGAR PARTIDO ============ -->
@@ -447,7 +447,7 @@
 
       <!-- Pareja fija -->
       <div id="fijoBlock" style="display:none;">
-        <h3>Definí las parejas</h3>
+        <h3>Define las parejas</h3>
         <div class="field">
           <label>Equipo A (2 jugadores)</label>
           <div id="teamASelector" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
@@ -594,8 +594,35 @@
   <section id="view-analysis" class="view">
     <div class="card">
       <h2>📊 ELO Ranking</h2>
+      <details style="margin-bottom:12px;">
+        <summary>¿Qué es el ELO Ranking?</summary>
+        <div style="font-size:0.85rem; color:var(--text); margin-top:10px; line-height:1.5;">
+          <p style="margin:6px 0;">
+            El <b>ELO</b> es un sistema de puntuación creado por el físico Árpad Élő en 1960 para rankear jugadores de ajedrez. Hoy se usa en muchos deportes y juegos (FIDE, fútbol internacional, LoL, Counter-Strike, etc.) porque captura el nivel relativo entre competidores mejor que un simple % de victorias.
+          </p>
+          <p style="margin:6px 0;">
+            <b>Idea central:</b> cada jugador tiene un rating numérico. Cuando juegas, los ratings se ajustan según el resultado y según <i>qué tan probable era</i> ese resultado. Ganarle a alguien con mucho más rating te da muchos puntos; perder contra alguien con menos rating te quita muchos puntos. Si todos juegan a su nivel esperado, los ratings se mantienen estables.
+          </p>
+          <p style="margin:6px 0;"><b>La fórmula:</b></p>
+          <pre style="background:var(--bg); padding:10px; border-radius:8px; font-size:0.78rem; overflow-x:auto; margin:4px 0;">R_nuevo = R_actual + K · (S − E)
+
+E = 1 / (1 + 10^((R_rival − R_tuyo) / 400))</pre>
+          <ul style="margin:6px 0 6px 18px; padding:0;">
+            <li><b>R</b> = rating del jugador</li>
+            <li><b>K</b> = sensibilidad del ajuste (acá K = <b>32</b>, valor típico para ligas casuales)</li>
+            <li><b>S</b> = resultado real: <b>1</b> si ganaste, <b>0.5</b> empate, <b>0</b> si perdiste</li>
+            <li><b>E</b> = probabilidad esperada de ganar (entre 0 y 1) según la diferencia de rating</li>
+          </ul>
+          <p style="margin:6px 0;">
+            <b>En esta app (pádel doble):</b> todos parten con <b>1000</b>. Como jugamos en parejas, el rating del equipo es el promedio de sus 2 integrantes. Cada jugador actualiza su rating individualmente usando el resultado del equipo. Por ejemplo, si tu equipo (promedio 1000) gana contra uno de 1100, tu E ≈ 0.36 y tu rating sube 32 × (1 − 0.36) ≈ <b>+20.5 puntos</b>. Si pierdes contra un equipo de 900, bajas más que si pierdes contra uno de 1100.
+          </p>
+          <p style="margin:6px 0;">
+            <b>Interpretación rápida:</b> una diferencia de 100 puntos ELO ≈ 64% probabilidad de ganar. Diferencia de 200 ≈ 76%. Diferencia de 400 ≈ 91%.
+          </p>
+        </div>
+      </details>
       <p style="font-size:0.8rem; color:var(--muted); margin:0 0 10px 0;">
-        Rating ELO (inicial 1000, K=32). Empates cuentan como medio triunfo. Se recalcula desde cero con cada cambio del historial.
+        Inicial: 1000 · K: 32 · Empate vale 0.5 · Recalculado desde cero con cada cambio del historial.
       </p>
       <div id="eloTable"></div>
       <div class="chart-container" style="margin-top:14px;">
@@ -641,7 +668,7 @@
     <div class="card">
       <h2>🔮 Predictor de Partidos</h2>
       <p style="font-size:0.8rem; color:var(--muted); margin:0 0 10px 0;">
-        Armá un 2 vs 2 hipotético. La probabilidad de victoria sale de los ratings ELO actuales.
+        Arma un 2 vs 2 hipotético. La probabilidad de victoria sale de los ratings ELO actuales.
       </p>
       <h3>Equipo A</h3>
       <div id="predTeamA" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
@@ -667,8 +694,8 @@
 <script type="module">
   // ============================================================
   //  CONFIGURACIÓN FIREBASE
-  //  Reemplazá este objeto con tu propia configuración (ver README)
-  //  Si lo dejás vacío, la app funcionará en modo local.
+  //  Reemplaza este objeto con tu propia configuración (ver README)
+  //  Si lo dejas vacío, la app funcionará en modo local.
   // ============================================================
   const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBrbPIFKJvzTE5tlBJ_X7LGImV95UCvVug",
@@ -1044,7 +1071,7 @@ function renderAmericanaRounds() {
   if (!c) return;
   c.innerHTML = '';
   if (STATE.matchDraft.rounds.length === 0) {
-    c.innerHTML = '<p style="color:var(--muted); font-size:0.85rem;">Seleccioná al menos 4 jugadores (cantidad par) para generar las rondas.</p>';
+    c.innerHTML = '<p style="color:var(--muted); font-size:0.85rem;">Selecciona al menos 4 jugadores (cantidad par) para generar las rondas.</p>';
     return;
   }
   STATE.matchDraft.rounds.forEach((r, idx) => {
@@ -1186,7 +1213,7 @@ function renderLibreInputs() {
   c.innerHTML = '';
   const sel = STATE.matchDraft.selectedPlayers;
   if (sel.length === 0) {
-    c.innerHTML = '<p style="color:var(--muted); font-size:0.85rem;">Seleccioná los jugadores que participaron.</p>';
+    c.innerHTML = '<p style="color:var(--muted); font-size:0.85rem;">Selecciona los jugadores que participaron.</p>';
     return;
   }
   c.innerHTML = `
@@ -1238,21 +1265,21 @@ async function saveMatch() {
       teamB: r.teamB,
       sets: r.sets.filter(s => s.a !== '' && s.b !== '').map(s => ({ a: +s.a, b: +s.b }))
     })).filter(r => r.sets.length > 0);
-    if (match.rounds.length === 0) { toast('Ingresá al menos 1 set'); return; }
+    if (match.rounds.length === 0) { toast('Ingresa al menos 1 set'); return; }
   } else if (m === 'fijo') {
     if (STATE.matchDraft.fijoTeamA.length !== 2 || STATE.matchDraft.fijoTeamB.length !== 2) {
-      toast('Necesitás 2 jugadores por equipo'); return;
+      toast('Necesitas 2 jugadores por equipo'); return;
     }
     match.players = [...STATE.matchDraft.fijoTeamA, ...STATE.matchDraft.fijoTeamB];
     const sets = STATE.matchDraft.fijoSets.filter(s => s.a !== '' && s.b !== '').map(s => ({ a:+s.a, b:+s.b }));
-    if (sets.length === 0) { toast('Ingresá al menos 1 set'); return; }
+    if (sets.length === 0) { toast('Ingresa al menos 1 set'); return; }
     match.rounds = [{
       teamA: STATE.matchDraft.fijoTeamA,
       teamB: STATE.matchDraft.fijoTeamB,
       sets
     }];
   } else if (m === 'libre') {
-    if (sel.length === 0) { toast('Seleccioná jugadores'); return; }
+    if (sel.length === 0) { toast('Selecciona jugadores'); return; }
     match.players = sel;
     match.libreStats = {};
     sel.forEach(pid => {
@@ -1523,7 +1550,7 @@ function renderAdvStats() {
   const matches = STATE.matches.filter(m => filter === 'all' || m.seasonId === filter);
 
   if (matches.length === 0) {
-    c.innerHTML = '<div class="empty">Sin datos. Cargá tu primer partido.</div>';
+    c.innerHTML = '<div class="empty">Sin datos. Carga tu primer partido.</div>';
     return;
   }
 
@@ -2413,7 +2440,7 @@ function renderPredictor() {
   const resBox = document.getElementById('predResult');
   if (!resBox) return;
   if (STATE.predDraft.teamA.length !== 2 || STATE.predDraft.teamB.length !== 2) {
-    resBox.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; text-align:center; padding:10px 0;">Elegí 2 jugadores por equipo para calcular probabilidades.</p>';
+    resBox.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; text-align:center; padding:10px 0;">Elige 2 jugadores por equipo para calcular probabilidades.</p>';
     return;
   }
   const { ratings } = computeELO();
