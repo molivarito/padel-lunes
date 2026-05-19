@@ -773,6 +773,10 @@ function toast(msg) {
 }
 function getPlayer(id) { return STATE.players.find(p => p.id === id); }
 function getPlayerName(id) { const p = getPlayer(id); return p ? p.name : '?'; }
+function fmtRecord(r) {
+  // "2V/3" si no hay empates; "1V-1E/3" si los hay
+  return r.ties ? `${r.wins}V-${r.ties}E/${r.plays}` : `${r.wins}V/${r.plays}`;
+}
 function fmtDate(d) {
   if (!d) return '';
   const dt = new Date(d);
@@ -1451,33 +1455,46 @@ function renderAdvStats() {
       const res = computeRoundResult(r);
       const teamAWon = res.winner === 'A';
       const teamBWon = res.winner === 'B';
+      const tied = res.winner === 'tie';
+      let gamesA = 0, gamesB = 0;
+      r.sets.forEach(s => { gamesA += +s.a||0; gamesB += +s.b||0; });
+      const diffA = gamesA - gamesB;
+      const diffB = gamesB - gamesA;
       // partners team A
       r.teamA.forEach(pid => {
         r.teamA.forEach(qid => {
           if (qid === pid || !adv[pid]) return;
-          if (!adv[pid].partners[qid]) adv[pid].partners[qid] = { wins:0, plays:0 };
+          if (!adv[pid].partners[qid]) adv[pid].partners[qid] = { wins:0, ties:0, plays:0, diff:0 };
           adv[pid].partners[qid].plays += 1;
+          adv[pid].partners[qid].diff += diffA;
           if (teamAWon) adv[pid].partners[qid].wins += 1;
+          else if (tied) adv[pid].partners[qid].ties += 1;
         });
         r.teamB.forEach(rid => {
           if (!adv[pid]) return;
-          if (!adv[pid].rivals[rid]) adv[pid].rivals[rid] = { wins:0, plays:0 };
+          if (!adv[pid].rivals[rid]) adv[pid].rivals[rid] = { wins:0, ties:0, plays:0, diff:0 };
           adv[pid].rivals[rid].plays += 1;
+          adv[pid].rivals[rid].diff += diffA;
           if (teamAWon) adv[pid].rivals[rid].wins += 1;
+          else if (tied) adv[pid].rivals[rid].ties += 1;
         });
       });
       r.teamB.forEach(pid => {
         r.teamB.forEach(qid => {
           if (qid === pid || !adv[pid]) return;
-          if (!adv[pid].partners[qid]) adv[pid].partners[qid] = { wins:0, plays:0 };
+          if (!adv[pid].partners[qid]) adv[pid].partners[qid] = { wins:0, ties:0, plays:0, diff:0 };
           adv[pid].partners[qid].plays += 1;
+          adv[pid].partners[qid].diff += diffB;
           if (teamBWon) adv[pid].partners[qid].wins += 1;
+          else if (tied) adv[pid].partners[qid].ties += 1;
         });
         r.teamA.forEach(rid => {
           if (!adv[pid]) return;
-          if (!adv[pid].rivals[rid]) adv[pid].rivals[rid] = { wins:0, plays:0 };
+          if (!adv[pid].rivals[rid]) adv[pid].rivals[rid] = { wins:0, ties:0, plays:0, diff:0 };
           adv[pid].rivals[rid].plays += 1;
+          adv[pid].rivals[rid].diff += diffB;
           if (teamBWon) adv[pid].rivals[rid].wins += 1;
+          else if (tied) adv[pid].rivals[rid].ties += 1;
         });
       });
     });
@@ -1498,12 +1515,28 @@ function renderAdvStats() {
     if (!data) return;
     const partners = Object.entries(data.partners)
       .filter(([,v]) => v.plays > 0)
-      .map(([pid, v]) => ({ pid, name: getPlayerName(pid), wins:v.wins, plays:v.plays, pct: Math.round(v.wins/v.plays*100) }))
-      .sort((a,b) => b.pct - a.pct);
+      .map(([pid, v]) => {
+        const ties = v.ties || 0;
+        const score = v.wins + 0.5 * ties;
+        return {
+          pid, name: getPlayerName(pid),
+          wins: v.wins, ties, plays: v.plays, diff: v.diff || 0,
+          pct: Math.round(score / v.plays * 100)
+        };
+      })
+      .sort((a,b) => b.pct - a.pct || b.diff - a.diff);
     const rivals = Object.entries(data.rivals)
       .filter(([,v]) => v.plays > 0)
-      .map(([pid, v]) => ({ pid, name: getPlayerName(pid), wins:v.wins, plays:v.plays, pct: Math.round(v.wins/v.plays*100) }))
-      .sort((a,b) => a.pct - b.pct);
+      .map(([pid, v]) => {
+        const ties = v.ties || 0;
+        const score = v.wins + 0.5 * ties;
+        return {
+          pid, name: getPlayerName(pid),
+          wins: v.wins, ties, plays: v.plays, diff: v.diff || 0,
+          pct: Math.round(score / v.plays * 100)
+        };
+      })
+      .sort((a,b) => a.pct - b.pct || a.diff - b.diff);
 
     const bestPartner = partners[0];
     const worstPartner = partners[partners.length - 1];
@@ -1518,9 +1551,9 @@ function renderAdvStats() {
           ${p.name}
         </summary>
         <div style="margin-top:10px; font-size:0.85rem;">
-          ${bestPartner ? `🤝 Mejor compañero: <b>${bestPartner.name}</b> (${bestPartner.wins}/${bestPartner.plays}, ${bestPartner.pct}%)<br>` : ''}
-          ${worstPartner && worstPartner !== bestPartner ? `😬 Peor compañero: <b>${worstPartner.name}</b> (${worstPartner.wins}/${worstPartner.plays}, ${worstPartner.pct}%)<br>` : ''}
-          ${hardestRival ? `🔥 Rival más difícil: <b>${hardestRival.name}</b> (le ganó ${hardestRival.wins}/${hardestRival.plays}, ${hardestRival.pct}%)` : ''}
+          ${bestPartner ? `🤝 Mejor compañero: <b>${bestPartner.name}</b> (${fmtRecord(bestPartner)}, ${bestPartner.pct}%)<br>` : ''}
+          ${worstPartner && worstPartner !== bestPartner ? `😬 Peor compañero: <b>${worstPartner.name}</b> (${fmtRecord(worstPartner)}, ${worstPartner.pct}%)<br>` : ''}
+          ${hardestRival ? `🔥 Rival más difícil: <b>${hardestRival.name}</b> (le ganó ${fmtRecord(hardestRival)}, ${hardestRival.pct}%)` : ''}
         </div>
       </details>
     `;
