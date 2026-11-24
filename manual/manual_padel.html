@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Padel de los Lunes — Manual ilustrado</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Chalkboard SE", "Comic Sans MS", "Comic Neue", sans-serif;
+    color: #1f2937; font-size: 10.6pt; line-height: 1.42;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page {
+    width: 210mm; height: 297mm; padding: 13mm 14mm 12mm 14mm;
+    position: relative; overflow: hidden; page-break-after: always;
+    background: #fffdf6;
+    background-image: radial-gradient(#e9e3cf 0.7px, transparent 0.7px);
+    background-size: 6mm 6mm;
+  }
+  .page:last-child { page-break-after: auto; }
+  h1, h2, h3 { font-family: "Marker Felt", "Chalkboard SE", "Comic Sans MS", sans-serif; margin: 0; }
+  h2 {
+    font-size: 23pt; color: #0f766e; margin-bottom: 3mm;
+    display: inline-block; padding: 1mm 4mm; background: #fff; border: 2.5px solid #1f2937;
+    border-radius: 3mm; box-shadow: 2.5px 2.5px 0 #1f2937; transform: rotate(-1deg);
+  }
+  h3 { font-size: 14.5pt; color: #b45309; margin: 2mm 0 1.5mm; }
+  p { margin: 1.4mm 0; }
+  b { color: #111827; }
+  td[style*="color"] b { color: inherit; }
+  .num { position: absolute; bottom: 6mm; right: 14mm; font-size: 9pt; color: #9ca3af; }
+  .lead { font-size: 11.5pt; }
+
+  /* Paneles tipo cómic */
+  .row { display: flex; gap: 4mm; margin: 3mm 0; }
+  .col { flex: 1; }
+  .panel {
+    background: #fff; border: 2.5px solid #1f2937; border-radius: 2.5mm;
+    box-shadow: 3px 3px 0 #1f2937; padding: 3mm 3.5mm; position: relative;
+  }
+  .panel.y { background: #fef9c3; }
+  .panel.g { background: #dcfce7; }
+  .panel.b { background: #dbeafe; }
+  .panel.p { background: #f3e8ff; }
+  .panel.r { background: #fee2e2; }
+  .panel.o { background: #ffedd5; }
+  .tag {
+    position: absolute; top: -3.2mm; left: 4mm; background: #1f2937; color: #fff;
+    font-size: 8.5pt; padding: 0.4mm 2.5mm; border-radius: 2mm; letter-spacing: 0.3px;
+  }
+
+  /* Globos de diálogo */
+  .say { display: flex; align-items: flex-end; gap: 2mm; margin: 2mm 0; }
+  .say.rev { flex-direction: row-reverse; }
+  .say svg.char { flex: none; }
+  .bubble {
+    position: relative; background: #fff; border: 2px solid #1f2937; border-radius: 4mm;
+    padding: 2mm 3mm; font-size: 10pt; margin-bottom: 9mm; max-width: 100%;
+  }
+  .bubble:after {
+    content: ""; position: absolute; left: -3.2mm; bottom: 3mm; width: 0; height: 0;
+    border: 1.6mm solid transparent; border-right: 2.6mm solid #1f2937; border-left: 0;
+  }
+  .say.rev .bubble:after { left: auto; right: -3.2mm; border-right: 0; border-left: 2.6mm solid #1f2937; }
+  .bubble.think { border-style: dashed; }
+
+  .formula {
+    font-family: "Menlo", "Courier New", monospace; font-size: 10pt; background: #111827; color: #fef3c7;
+    border-radius: 2mm; padding: 2.5mm 4mm; margin: 2mm 0; line-height: 1.6;
+  }
+  .formula .c { color: #86efac; }
+  table { border-collapse: collapse; width: 100%; font-size: 9.8pt; }
+  th, td { border: 1.5px solid #1f2937; padding: 1.2mm 2mm; text-align: left; vertical-align: top; }
+  th { background: #1f2937; color: #fff; font-weight: normal; }
+  td.c, th.c { text-align: center; }
+  .pill { display: inline-block; padding: 0 2mm; border-radius: 3mm; border: 1.5px solid #1f2937; background: #fff; font-size: 9pt; }
+  .warn { background: #fee2e2; border-left: 2mm solid #dc2626; padding: 2mm 3mm; border-radius: 1mm; margin: 2mm 0; }
+  .tip  { background: #dcfce7; border-left: 2mm solid #16a34a; padding: 2mm 3mm; border-radius: 1mm; margin: 2mm 0; }
+  .small { font-size: 9pt; color: #4b5563; }
+  ul { margin: 1mm 0; padding-left: 5mm; }
+  li { margin: 0.8mm 0; }
+  .center { text-align: center; }
+  .boom {
+    display: inline-block; font-family: "Marker Felt", sans-serif; font-size: 15pt; color: #dc2626;
+    background: #fde047; border: 2px solid #1f2937; padding: 0.5mm 3mm; transform: rotate(-4deg);
+    box-shadow: 2px 2px 0 #1f2937;
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== PERSONAJES (SVG reutilizables) ==================== -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- Cuerpo común: la polera toma el color de 'color' -->
+    <symbol id="cuerpo" viewBox="0 0 120 160">
+      <path d="M48 128 L42 150" stroke="#1f2937" stroke-width="5" stroke-linecap="round"/>
+      <path d="M72 128 L78 150" stroke="#1f2937" stroke-width="5" stroke-linecap="round"/>
+      <ellipse cx="39" cy="152" rx="8" ry="4" fill="#fff" stroke="#1f2937" stroke-width="2"/>
+      <ellipse cx="81" cy="152" rx="8" ry="4" fill="#fff" stroke="#1f2937" stroke-width="2"/>
+      <rect x="38" y="78" width="44" height="52" rx="14" fill="currentColor" stroke="#1f2937" stroke-width="2.5"/>
+      <path d="M42 90 L26 112" stroke="#1f2937" stroke-width="5" stroke-linecap="round"/>
+      <path d="M78 90 L96 104" stroke="#1f2937" stroke-width="5" stroke-linecap="round"/>
+      <!-- paleta -->
+      <path d="M97 104 L104 92" stroke="#1f2937" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="108" cy="80" rx="11" ry="14" fill="#fbbf24" stroke="#1f2937" stroke-width="2.5"/>
+      <circle cx="105" cy="76" r="1.6" fill="#1f2937"/><circle cx="111" cy="76" r="1.6" fill="#1f2937"/>
+      <circle cx="108" cy="82" r="1.6" fill="#1f2937"/><circle cx="105" cy="87" r="1.6" fill="#1f2937"/><circle cx="111" cy="87" r="1.6" fill="#1f2937"/>
+    </symbol>
+
+    <!-- Chuqui: oso -->
+    <symbol id="oso" viewBox="0 0 120 160">
+      <use href="#cuerpo" color="#7c3aed"/>
+      <circle cx="38" cy="26" r="11" fill="#8b5a2b" stroke="#1f2937" stroke-width="2.5"/>
+      <circle cx="82" cy="26" r="11" fill="#8b5a2b" stroke="#1f2937" stroke-width="2.5"/>
+      <circle cx="38" cy="26" r="5" fill="#d9a066"/><circle cx="82" cy="26" r="5" fill="#d9a066"/>
+      <circle cx="60" cy="50" r="30" fill="#8b5a2b" stroke="#1f2937" stroke-width="2.5"/>
+      <ellipse cx="60" cy="61" rx="14" ry="11" fill="#d9a066" stroke="#1f2937" stroke-width="2"/>
+      <ellipse cx="60" cy="56" rx="5" ry="3.5" fill="#1f2937"/>
+      <path d="M53 64 Q60 70 67 64" stroke="#1f2937" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="49" cy="44" r="3.5" fill="#1f2937"/><circle cx="71" cy="44" r="3.5" fill="#1f2937"/>
+      <circle cx="50" cy="43" r="1.1" fill="#fff"/><circle cx="72" cy="43" r="1.1" fill="#fff"/>
+      <text x="60" y="112" font-size="13" text-anchor="middle" fill="#fff" font-family="Marker Felt">CH</text>
+    </symbol>
+
+    <!-- Nico: zorro -->
+    <symbol id="zorro" viewBox="0 0 120 160">
+      <use href="#cuerpo" color="#dc2626"/>
+      <path d="M33 34 L36 6 L56 26 Z" fill="#ea7a2c" stroke="#1f2937" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M87 34 L84 6 L64 26 Z" fill="#ea7a2c" stroke="#1f2937" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M38 28 L39 14 L49 24 Z" fill="#1f2937"/><path d="M82 28 L81 14 L71 24 Z" fill="#1f2937"/>
+      <path d="M30 40 Q30 22 60 22 Q90 22 90 40 Q90 62 60 78 Q30 62 30 40 Z" fill="#ea7a2c" stroke="#1f2937" stroke-width="2.5"/>
+      <path d="M34 50 Q46 52 60 76 Q74 52 86 50 Q84 64 60 78 Q36 64 34 50 Z" fill="#fff"/>
+      <ellipse cx="60" cy="72" rx="4.5" ry="3.2" fill="#1f2937"/>
+      <path d="M45 42 Q50 38 55 42" stroke="#1f2937" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M65 42 Q70 38 75 42" stroke="#1f2937" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M50 30 L57 34 M70 30 L63 34" stroke="#1f2937" stroke-width="2" stroke-linecap="round"/>
+      <text x="60" y="112" font-size="13" text-anchor="middle" fill="#fff" font-family="Marker Felt">NI</text>
+    </symbol>
+
+    <!-- Pato: pato -->
+    <symbol id="pato" viewBox="0 0 120 160">
+      <use href="#cuerpo" color="#0f766e"/>
+      <path d="M58 20 Q54 8 62 4 M60 20 Q64 9 72 9" stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="60" cy="48" r="30" fill="#facc15" stroke="#1f2937" stroke-width="2.5"/>
+      <path d="M40 58 Q60 50 80 58 Q78 72 60 72 Q42 72 40 58 Z" fill="#f97316" stroke="#1f2937" stroke-width="2.5"/>
+      <path d="M42 61 Q60 64 78 61" stroke="#1f2937" stroke-width="1.8" fill="none"/>
+      <ellipse cx="49" cy="40" rx="5" ry="6" fill="#fff" stroke="#1f2937" stroke-width="2"/>
+      <ellipse cx="71" cy="40" rx="5" ry="6" fill="#fff" stroke="#1f2937" stroke-width="2"/>
+      <circle cx="50" cy="41" r="2.6" fill="#1f2937"/><circle cx="72" cy="41" r="2.6" fill="#1f2937"/>
+      <text x="60" y="112" font-size="13" text-anchor="middle" fill="#fff" font-family="Marker Felt">PA</text>
+    </symbol>
+
+    <!-- Uriel: el de lentes -->
+    <symbol id="cool" viewBox="0 0 120 160">
+      <use href="#cuerpo" color="#f59e0b"/>
+      <circle cx="60" cy="48" r="30" fill="#fde047" stroke="#1f2937" stroke-width="2.5"/>
+      <path d="M31 40 Q34 14 60 16 Q88 15 89 40 Q80 28 66 30 Q58 22 48 30 Q38 30 31 40 Z" fill="#3f2d20" stroke="#1f2937" stroke-width="2"/>
+      <path d="M36 42 L84 42" stroke="#1f2937" stroke-width="3"/>
+      <path d="M37 42 Q38 54 49 54 Q58 54 58 42 Z" fill="#111827" stroke="#1f2937" stroke-width="2"/>
+      <path d="M62 42 Q62 54 71 54 Q82 54 83 42 Z" fill="#111827" stroke="#1f2937" stroke-width="2"/>
+      <path d="M42 45 L47 45 M67 45 L72 45" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M48 64 Q60 72 72 62" stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <text x="60" y="112" font-size="13" text-anchor="middle" fill="#fff" font-family="Marker Felt">UR</text>
+    </symbol>
+
+    <!-- Narradora: la pelotita -->
+    <symbol id="pelota" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="44" fill="#d9f99d" stroke="#1f2937" stroke-width="3"/>
+      <path d="M22 38 Q60 58 22 84" stroke="#fff" stroke-width="5" fill="none"/>
+      <path d="M98 36 Q60 60 98 86" stroke="#fff" stroke-width="5" fill="none"/>
+      <ellipse cx="48" cy="52" rx="6" ry="8" fill="#fff" stroke="#1f2937" stroke-width="2"/>
+      <ellipse cx="72" cy="52" rx="6" ry="8" fill="#fff" stroke="#1f2937" stroke-width="2"/>
+      <circle cx="49" cy="54" r="3.4" fill="#1f2937"/><circle cx="73" cy="54" r="3.4" fill="#1f2937"/>
+      <path d="M46 72 Q60 84 74 72" stroke="#1f2937" stroke-width="3" fill="#f87171" stroke-linecap="round"/>
+      <path d="M14 104 L30 92 M106 104 L90 92" stroke="#1f2937" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- Cancha vista desde arriba -->
+    <symbol id="cancha" viewBox="0 0 200 110">
+      <rect x="2" y="2" width="196" height="106" rx="4" fill="#2563eb" stroke="#1f2937" stroke-width="3"/>
+      <rect x="12" y="10" width="176" height="90" fill="#3b82f6" stroke="#fff" stroke-width="2"/>
+      <line x1="100" y1="6" x2="100" y2="104" stroke="#1f2937" stroke-width="4" stroke-dasharray="3 2"/>
+      <line x1="45" y1="10" x2="45" y2="100" stroke="#fff" stroke-width="2"/>
+      <line x1="155" y1="10" x2="155" y2="100" stroke="#fff" stroke-width="2"/>
+      <line x1="45" y1="55" x2="155" y2="55" stroke="#fff" stroke-width="2"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ==================== 1. PORTADA ==================== -->
+<section class="page" style="background:#0f766e; background-image:radial-gradient(#14b8a6 1px, transparent 1px); background-size:7mm 7mm; color:#fff;">
+  <div class="center" style="margin-top:8mm;">
+    <div class="boom" style="font-size:13pt;">MANUAL ILUSTRADO · VERSIÓN 2 · NOV 2026</div>
+    <h1 style="font-size:46pt; line-height:1.05; margin-top:8mm; color:#fde047; text-shadow:4px 4px 0 #1f2937;">Pádel de<br>los Lunes</h1>
+    <div style="font-family:'Marker Felt'; font-size:20pt; margin-top:4mm;">La liga con hándicap, explicada<br>para que nadie alegue (tanto)</div>
+  </div>
+
+  <svg viewBox="0 0 400 260" style="width:170mm; display:block; margin:10mm auto 0;">
+    <use href="#cancha" x="40" y="120" width="320" height="176"/>
+    <use href="#oso" x="40" y="20" width="90" height="120"/>
+    <use href="#pato" x="120" y="34" width="90" height="120"/>
+    <use href="#zorro" x="200" y="34" width="90" height="120"/>
+    <use href="#cool" x="280" y="20" width="90" height="120"/>
+    <use href="#pelota" x="178" y="0" width="44" height="44"/>
+  </svg>
+
+  <div class="panel" style="margin:6mm 10mm 0; color:#1f2937; background:#fffdf6;">
+    <p style="margin:0;"><b>Qué hay adentro:</b> los personajes y la app por dentro · el <b>Nivel</b> (cómo la app adivina el marcador) · un ejemplo donde <b>ganas y restas</b> · todas las <b>modalidades</b> · el plan de 90 minutos · la <b>Copa del mes</b> · los <b>premios</b> y la vitrina · el resto de la app · preguntas frecuentes y un torpedo para el celular.</p>
+  </div>
+  <p class="center" style="margin-top:6mm; font-size:9.5pt; opacity:0.85;">Todo lo que dice este manual sale del código de la app (bloque <i>LIGA-CORE</i> de <i>index.html</i>). Si el manual y la app no están de acuerdo, manda la app.</p>
+</section>
+
+<!-- ==================== 2. PERSONAJES Y PESTAÑAS ==================== -->
+<section class="page">
+  <h2>¿Quién es quién?</h2>
+  <div class="row" style="align-items:flex-end;">
+    <div class="col center"><svg class="char" viewBox="0 0 120 160" width="78" height="104"><use href="#oso"/></svg><br><b>Chuqui</b> 🐻<br><span class="small">Morado</span></div>
+    <div class="col center"><svg class="char" viewBox="0 0 120 160" width="78" height="104"><use href="#zorro"/></svg><br><b>Nico</b> 🦊<br><span class="small">Rojo</span></div>
+    <div class="col center"><svg class="char" viewBox="0 0 120 160" width="78" height="104"><use href="#pato"/></svg><br><b>Pato</b> 🦆<br><span class="small">Verde azulado</span></div>
+    <div class="col center"><svg class="char" viewBox="0 0 120 160" width="78" height="104"><use href="#cool"/></svg><br><b>Uriel</b> 😎<br><span class="small">Naranjo</span></div>
+    <div class="col center"><svg viewBox="0 0 120 120" width="80" height="80"><use href="#pelota"/></svg><br><b>La Pelotita</b><br><span class="small">Narra y explica</span></div>
+  </div>
+  <p class="small center">(Son los mismos emojis y colores que cada uno tiene en la app. Cualquier parecido con la realidad es absolutamente intencional.)</p>
+
+  <div class="say">
+    <svg class="char" viewBox="0 0 120 120" width="62" height="62"><use href="#pelota"/></svg>
+    <div class="bubble">¡Hola! Yo soy la que recibe todos los golpes, así que algo sé de esto. La app tiene <b>seis pestañas</b> abajo. Te las presento antes de meternos en los números.</div>
+  </div>
+
+  <table>
+    <tr><th style="width:24%">Pestaña</th><th>Para qué sirve</th></tr>
+    <tr><td>➕ <b>Cargar</b></td><td>Anotar el partido de la noche: fecha, modalidad, quiénes juegan y el marcador de cada ronda. Aquí también eliges las opciones (final, ventaja, por puntos, comodín, desafío) y la app te propone las parejas y cuánto dura cada ronda.</td></tr>
+    <tr><td>📅 <b>Historial</b></td><td>Todos los partidos guardados, con el detalle de cada ronda: el marcador, lo que se esperaba y cuántos puntos movió. Se pueden editar o borrar.</td></tr>
+    <tr><td>🏆 <b>Liga</b></td><td>El corazón: la <b>Copa del mes</b>, los <b>premios de cada fecha</b>, la <b>vitrina</b> con el historial de trofeos y la <b>tabla clásica 3-1-0</b> de toda la vida.</td></tr>
+    <tr><td>📈 <b>Análisis</b></td><td>Para los ñoños: el <b>Nivel</b> de cada uno y cómo ha evolucionado, matriz de compañeros, márgenes, forma y rachas, rendimiento contra lo esperado y un <b>predictor</b> de partidos.</td></tr>
+    <tr><td>👥 <b>Jugadores</b></td><td>Agregar, editar (nombre, emoji, color) o desactivar jugadores. Un jugador inactivo no se borra: sus partidos siguen contando.</td></tr>
+    <tr><td>⚙️ <b>Config</b></td><td>Temporadas, puntos de la tabla clásica, estado de la sincronización con Firebase, exportar e importar los datos (respaldo en JSON) y el botón rojo de borrar todo (no lo toques).</td></tr>
+  </table>
+
+  <div class="row">
+    <div class="col panel b">
+      <span class="tag">DATO</span>
+      <p><b>Todos ven lo mismo.</b> Si la app está conectada a Firebase, lo que anota uno aparece al tiro en el celular de los demás. Si no, guarda todo en el navegador de ese celular, y solo ahí.</p>
+    </div>
+    <div class="col panel y">
+      <span class="tag">GLOSARIO EXPRESS</span>
+      <p><b>Ronda</b> = un partido corto con una combinación de parejas. <b>Fecha</b> = todo lo que se jugó un mismo día. <b>Copa</b> = un mes calendario.</p>
+    </div>
+  </div>
+  <div class="num">2</div>
+</section>
+
+<!-- ==================== 3. EL NIVEL ==================== -->
+<section class="page">
+  <h2>El Nivel: la app adivina el marcador</h2>
+  <p class="lead">El problema de siempre: si juegan los dos mejores contra los dos peores, ganar no tiene ningún mérito. Por eso la liga nueva <b>no premia ganar</b>: premia <b>jugar mejor de lo que se esperaba</b>.</p>
+
+  <div class="row">
+    <div class="col panel">
+      <span class="tag">PASO 1</span>
+      <h3>Cada uno tiene un Nivel</h3>
+      <p>Todos partieron en <b>1000</b>. Es un número tipo ELO (como en el ajedrez): si juegas bien sube, si juegas mal baja. El nivel de una pareja es el <b>promedio</b> de sus dos integrantes.</p>
+    </div>
+    <div class="col panel">
+      <span class="tag">PASO 2</span>
+      <h3>La app predice el marcador</h3>
+      <p>Antes de cada ronda, compara el nivel de las dos parejas y calcula <b>qué fracción de los games</b> debería ganar cada una. Parejas iguales: mitad y mitad. Si una es mucho mejor, se espera que gane bastante más de la mitad.</p>
+    </div>
+  </div>
+
+  <div class="row" style="align-items:center;">
+    <div class="col" style="flex:1.25;">
+      <svg viewBox="0 0 470 230" style="width:100%;">
+        <rect x="40" y="20" width="400" height="170" fill="#fff" stroke="#1f2937" stroke-width="2"/>
+        <line x1="40" y1="105" x2="440" y2="105" stroke="#d1d5db" stroke-dasharray="4 3"/>
+        <line x1="240" y1="20" x2="240" y2="190" stroke="#d1d5db" stroke-dasharray="4 3"/>
+        <path d="M40.0 174.5 L52.5 172.4 L65.0 170.0 L77.5 167.3 L90.0 164.3 L102.5 161.0 L115.0 157.4 L127.5 153.5 L140.0 149.2 L152.5 144.5 L165.0 139.6 L177.5 134.3 L190.0 128.8 L202.5 123.1 L215.0 117.1 L227.5 111.1 L240.0 105.0 L252.5 98.9 L265.0 92.9 L277.5 86.9 L290.0 81.2 L302.5 75.7 L315.0 70.4 L327.5 65.5 L340.0 60.8 L352.5 56.5 L365.0 52.6 L377.5 49.0 L390.0 45.7 L402.5 42.7 L415.0 40.0 L427.5 37.6 L440.0 35.5" stroke="#0f766e" stroke-width="4" fill="none"/>
+        <circle cx="240" cy="105" r="6" fill="#fde047" stroke="#1f2937" stroke-width="2"/>
+        <circle cx="290" cy="81.2" r="6" fill="#f97316" stroke="#1f2937" stroke-width="2"/>
+        <text x="300" y="102" font-size="13" font-family="Chalkboard SE">+100 → 64 %</text>
+        <text x="250" y="132" font-size="13" font-family="Chalkboard SE">iguales → 50 %</text>
+        <text x="36" y="25" font-size="12" text-anchor="end" font-family="Chalkboard SE">100%</text>
+        <text x="36" y="109" font-size="12" text-anchor="end" font-family="Chalkboard SE">50%</text>
+        <text x="36" y="193" font-size="12" text-anchor="end" font-family="Chalkboard SE">0%</text>
+        <text x="40" y="208" font-size="12" font-family="Chalkboard SE">−400</text>
+        <text x="240" y="208" font-size="12" text-anchor="middle" font-family="Chalkboard SE">0</text>
+        <text x="440" y="208" font-size="12" text-anchor="end" font-family="Chalkboard SE">+400</text>
+        <text x="240" y="225" font-size="13" text-anchor="middle" font-family="Chalkboard SE">mi pareja tiene X puntos de nivel más que la rival</text>
+        <text x="44" y="14" font-size="13" font-family="Chalkboard SE">% de los games que se espera que saque mi pareja</text>
+      </svg>
+    </div>
+    <div class="col">
+      <div class="say rev">
+        <svg class="char" viewBox="0 0 120 160" width="60" height="80"><use href="#zorro"/></svg>
+        <div class="bubble">O sea, ¿100 puntos de nivel de diferencia es harto?</div>
+      </div>
+      <div class="say">
+        <svg class="char" viewBox="0 0 120 120" width="54" height="54"><use href="#pelota"/></svg>
+        <div class="bubble">Se nota: la pareja con 100 más debería sacar el <b>64 %</b> de los games. En una ronda de 12 games, unos 7,7 contra 4,3.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel g">
+    <span class="tag">PASO 3 · LO IMPORTANTE</span>
+    <h3>Se suma lo que sacas por sobre lo esperado</h3>
+    <p>Terminada la ronda, la app compara los games que sacó tu pareja con los que se esperaban. <b>Cada game por sobre lo esperado vale 6 puntos</b> para cada integrante. Y lo que suma una pareja <b>se le resta</b> a cada rival: es un juego de <b>suma cero</b>: lo que gana uno lo pierde otro.</p>
+    <div class="formula">
+      E        = 1 / (1 + 10^((Nivel rival − Nivel pareja) / 400))   <span class="c">← fracción esperada</span><br>
+      esperado = E × games jugados en la ronda<br>
+      puntos   = 6 × (games ganados − esperado)                      <span class="c">← a cada uno de la pareja</span>
+    </div>
+    <p class="small"><b>Con números:</b> si tu pareja tiene 100 más, E = 1 / (1 + 10^(−100/400)) = 0,64; en 12 games se espera 0,64 × 12 = 7,7. <b>No tienes que calcular nada:</b> la app lo hace y te muestra el marcador esperado antes de cada ronda.</p>
+    <p>Esos puntos hacen <b>dos cosas a la vez</b>: suman a la <b>Copa del mes</b> (un contador que parte de cero cada mes) y mueven tu <b>Nivel</b> (que te acompaña para siempre). Así, al que viene ganando la app le sube la vara (la próxima vez se espera más de él) y al que viene perdiendo se la baja.</p>
+  </div>
+
+  <div class="tip"><b>Ojo con esto:</b> una ronda larga pesa más que una corta, porque tiene más games en juego. Y el Nivel <b>se recalcula desde cero</b> cada vez que se agrega, edita o borra un partido, así que corregir un marcador viejo arregla todo lo que vino después.</div>
+  <div class="num">3</div>
+</section>
+
+<!-- ==================== 4. EJEMPLO RESUELTO ==================== -->
+<section class="page">
+  <h2>Ejemplo: ganar… y restar</h2>
+  <p class="lead">Supongamos que <b>Chuqui + Pato</b> tienen nivel promedio <b>1100</b> y <b>Nico + Uriel</b>, <b>1000</b>. Juegan una ronda de <b>12 games</b>.</p>
+
+  <div class="row" style="align-items:center;">
+    <svg viewBox="0 0 120 160" width="62" height="83"><use href="#oso"/></svg>
+    <svg viewBox="0 0 120 160" width="62" height="83"><use href="#pato"/></svg>
+    <div class="col center">
+      <div style="font-family:'Marker Felt'; font-size:13pt;">La app predice</div>
+      <svg viewBox="0 0 300 46" style="width:100%;">
+        <rect x="2" y="6" width="190" height="30" fill="#0f766e" stroke="#1f2937" stroke-width="2"/>
+        <rect x="192" y="6" width="106" height="30" fill="#dc2626" stroke="#1f2937" stroke-width="2"/>
+        <text x="97" y="27" font-size="16" fill="#fff" text-anchor="middle" font-family="Marker Felt">7,7 games (64 %)</text>
+        <text x="245" y="27" font-size="16" fill="#fff" text-anchor="middle" font-family="Marker Felt">4,3</text>
+      </svg>
+    </div>
+    <svg viewBox="0 0 120 160" width="62" height="83"><use href="#zorro"/></svg>
+    <svg viewBox="0 0 120 160" width="62" height="83"><use href="#cool"/></svg>
+  </div>
+
+  <h3>Tres finales posibles</h3>
+  <table>
+    <tr><th>Marcador final</th><th>Cálculo para Chuqui y Pato</th><th class="c">Chuqui y Pato</th><th class="c">Nico y Uriel</th></tr>
+    <tr><td><b>9 – 3</b> (paliza)</td><td>6 × (9 − 7,68) = 6 × 1,32</td><td class="c" style="color:#15803d;"><b>+7,9</b> cada uno</td><td class="c" style="color:#b91c1c;"><b>−7,9</b> cada uno</td></tr>
+    <tr style="background:#fef9c3;"><td><b>7 – 5</b> (ganan apretado)</td><td>6 × (7 − 7,68) = 6 × (−0,68)</td><td class="c" style="color:#b91c1c;"><b>−4,1</b> cada uno</td><td class="c" style="color:#15803d;"><b>+4,1</b> cada uno</td></tr>
+    <tr><td><b>6 – 6</b> (empate)</td><td>6 × (6 − 7,68) = 6 × (−1,68)</td><td class="c" style="color:#b91c1c;"><b>−10,1</b> cada uno</td><td class="c" style="color:#15803d;"><b>+10,1</b> cada uno</td></tr>
+  </table>
+
+  <div class="row">
+    <div class="col panel r">
+      <span class="tag">ESCENA 1</span>
+      <div class="say">
+        <svg class="char" viewBox="0 0 120 160" width="58" height="77"><use href="#oso"/></svg>
+        <div class="bubble">¡¿Cómo que restamos?! ¡Ganamos 7 a 5!</div>
+      </div>
+      <div class="say rev">
+        <svg class="char" viewBox="0 0 120 120" width="50" height="50"><use href="#pelota"/></svg>
+        <div class="bubble">Ganaron, sí. Pero con su nivel se esperaba que sacaran casi 8. Sacaron menos de lo que valían.</div>
+      </div>
+    </div>
+    <div class="col panel g">
+      <span class="tag">ESCENA 2</span>
+      <div class="say">
+        <svg class="char" viewBox="0 0 120 160" width="58" height="77"><use href="#cool"/></svg>
+        <div class="bubble">Y nosotros perdimos y sumamos 4. Perder nunca se sintió tan bien.</div>
+      </div>
+      <div class="say rev">
+        <svg class="char" viewBox="0 0 120 160" width="58" height="77"><use href="#zorro"/></svg>
+        <div class="bubble">Moraleja: la derrota digna existe y da puntos.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel y">
+    <span class="tag">LO QUE TIENES QUE RECORDAR</span>
+    <ul>
+      <li><b>Se puede sumar perdiendo y restar ganando.</b> Lo que importa es el marcador comparado con lo esperado, no quién ganó.</li>
+      <li><b>Cada game cuenta</b>, hasta el último. Con parejas del mismo nivel se espera la mitad de los games: perder 2–8 son 6 × (2 − 5) = −18 puntos; si descuentas a 5–8, son 6 × (5 − 6,5) = −9.</li>
+      <li>Si las dos parejas tienen el mismo nivel, lo esperado es mitad y mitad: ganar 7–5 da +6 a cada ganador (un game sobre los 6 esperados).</li>
+      <li>El que es favorito todas las semanas lo tiene cada vez más difícil. Es justamente la gracia: <b>el hándicap empareja la liga</b>.</li>
+    </ul>
+  </div>
+  <div class="num">4</div>
+</section>
+
+<!-- ==================== 5. MODALIDADES I ==================== -->
+<section class="page">
+  <h2>Modalidades (1): cómo se arman las parejas</h2>
+  <p>Al cargar un partido eliges una de cuatro modalidades. Todas cuentan para la liga, <b>menos Libre</b>.</p>
+
+  <div class="panel b" style="margin-top:4mm;">
+    <span class="tag">🔄 AMERICANA</span>
+    <div class="row" style="margin:1mm 0;">
+      <div class="col" style="flex:1.4;">
+        <p>La clásica. Con 4 jugadores son <b>tres rondas</b> y cada uno juega <b>una vez con cada compañero</b>: AB contra CD, AC contra BD, AD contra BC. Con el botón 🎲 se sortea el orden.</p>
+        <p class="small">Si vienen más de 4, la app arma rotaciones automáticas para repartir los compañeros.</p>
+      </div>
+      <div class="col">
+        <table style="font-size:9pt;">
+          <tr><th>Ronda</th><th>Pareja A</th><th>Pareja B</th></tr>
+          <tr><td class="c">1</td><td>🐻 + 🦊</td><td>🦆 + 😎</td></tr>
+          <tr><td class="c">2</td><td>🐻 + 🦆</td><td>🦊 + 😎</td></tr>
+          <tr><td class="c">3</td><td>🐻 + 😎</td><td>🦊 + 🦆</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel o" style="margin-top:5mm;">
+    <span class="tag">🏁 AMERICANA CON FINAL</span>
+    <div class="row" style="margin:1mm 0; align-items:center;">
+      <div class="col" style="flex:1.5;">
+        <p>Después de las tres rondas se juega una <b>cuarta, la final</b>: el <b>1.º con el 4.º</b> de la noche contra el <b>2.º con el 3.º</b> (la tabla de la noche se ordena por puntos de la liga).</p>
+        <p>Sus puntos de copa <b>valen doble para los cuatro</b>. Pero ojo: el doble es solo para la copa; el <b>Nivel</b> se mueve como en cualquier ronda.</p>
+      </div>
+      <div class="col center">
+        <div class="say rev">
+          <svg class="char" viewBox="0 0 120 160" width="56" height="75"><use href="#pato"/></svg>
+          <div class="bubble">¿Y por qué el primero con el último?</div>
+        </div>
+        <p class="small" style="margin-top:-4mm; padding-right:16mm;">Para que la final sea pareja: el mejor carga al peor de la noche.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel r" style="margin-top:5mm;">
+    <span class="tag">🌶️ MEXICANO</span>
+    <p><b>Cinco rondas cortas</b>, exactamente 4 jugadores. La <b>primera</b> se arma por Nivel (1.º+4.º contra 2.º+3.º). Las <b>siguientes</b> se arman con la tabla de la noche, con la misma regla: <b>1.º con 4.º contra 2.º con 3.º</b>. Anotas el marcador de la ronda y apretas el botón para que la app arme la siguiente.</p>
+    <div class="say">
+      <svg class="char" viewBox="0 0 120 160" width="56" height="75"><use href="#zorro"/></svg>
+      <div class="bubble">O sea, si quedo primero después de la ronda 1, en la ronda 2 me toca de compañero el que va último. Ya entendí por qué se llama picante.</div>
+    </div>
+    <p><b>¿Qué tan cortas?</b> Los 80 minutos útiles se dividen en 5: <b>16 minutos por ronda</b>, que a nuestro ritmo son <b>unos 7 games</b>. Se juega por tiempo: cuando suena la alarma se termina el game en curso y se anota lo que haya (un 4–3 o un 5–2 son normales). Si se prende <b>por puntos</b>, cada ronda va <b>a 32 puntos</b> corridos.</p>
+    <p class="small">El mexicano no tiene final (ya se arma solo por tabla), pero sí admite ventaja en cancha, rondas por puntos y comodín.</p>
+  </div>
+
+  <div class="row" style="margin-top:5mm;">
+    <div class="col panel p">
+      <span class="tag">⚔️ PAREJA FIJA</span>
+      <p>Las mismas dos parejas toda la noche. Defines el equipo A y el B, y anotas los <b>sets</b>. Plan sugerido: <b>2 sets con punto de oro</b>; si quedan 1–1, <b>súper tie-break a 10</b>, que se anota como un set 1–0.</p>
+      <p class="small"><b>Punto de oro:</b> en 40–40 se juega un solo punto que decide el game. <b>Súper tie-break:</b> desempate a 10 puntos (con 2 de diferencia) en vez de un tercer set.</p>
+      <p class="small">Para la liga, todo el partido es <b>una sola ronda larga</b>: se suman los games de todos los sets y se comparan con lo esperado. Por eso pesa harto.</p>
+    </div>
+    <div class="col panel">
+      <span class="tag">📝 LIBRE</span>
+      <p>Para lo que no calza: anotas a mano los puntos y games de cada jugador. Sirve para el registro y la tabla clásica, pero <b>no cuenta para la liga</b> (no hay parejas ni marcador que comparar con lo esperado).</p>
+    </div>
+  </div>
+  <div class="num">5</div>
+</section>
+
+<!-- ==================== 6. MODALIDADES II: LAS OPCIONES ==================== -->
+<section class="page">
+  <h2>Modalidades (2): los condimentos</h2>
+  <p>Encima de la modalidad se pueden prender <b>opciones</b>. Se combinan entre sí.</p>
+
+  <div class="panel g" style="margin-top:4mm;">
+    <span class="tag">⚖️ VENTAJA EN CANCHA</span>
+    <div class="row" style="margin:1mm 0;">
+      <div class="col" style="flex:1.5;">
+        <p>El hándicap se lleva a la cancha: la pareja <b>no favorita parte con games arriba</b>. La app calcula cuántos para que el partido quede parejo, según la diferencia de nivel y el largo de la ronda.</p>
+        <p><b>Ejemplo:</b> 1100 contra 1000 en una ronda de 12 games → la pareja de 1000 <b>parte 3–0</b>.</p>
+        <p>Se anota el <b>marcador final de la cancha</b>, con la ventaja incluida. La ronda la gana quien termina arriba en la cancha; para la copa y el Nivel, la app <b>descuenta la ventaja</b> y aplica el cálculo de siempre.</p>
+      </div>
+      <div class="col">
+        <div class="panel" style="padding:2mm 3mm; box-shadow:none;">
+          <p style="margin:0;"><b>En la cancha termina 8–7 para los de 1000.</b> Sus 8 son 3 de regalo + 5 ganados jugando: se jugaron 12 games (7 + 5) y el marcador muestra 15 porque incluye los 3 de regalo.</p>
+          <p class="small" style="margin:1mm 0 0;">Games reales: 7 a 5 para los favoritos. Se esperaba 7,7 → los favoritos <b>−4,1</b>, los de 1000 <b>+4,1</b>. Ganaron en la cancha <i>y</i> sumaron.</p>
+        </div>
+        <p class="small">Si las parejas tienen el mismo nivel, no hay ventaja.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel b" style="margin-top:5mm;">
+    <span class="tag">🔢 POR PUNTOS</span>
+    <p>En vez de games, cada ronda se juega a una <b>cantidad fija de puntos corridos</b>; el <b>saque cambia cada 4 puntos</b>. Se anotan los puntos de cada pareja.</p>
+    <p>Como un punto suelto dice menos que un game, la fórmula se ajusta: la escala es <b>1000 en vez de 400</b> (la diferencia de nivel pesa menos) y vale <b>3 puntos de copa por cada punto</b> sobre lo esperado, en vez de 6.</p>
+    <p class="small"><b>Ejemplo:</b> 1100 contra 1000 a 52 puntos → se espera 29,0 a 23,0. Si terminan 30–22, los favoritos suman 3 × (30 − 28,98) = 3 × 1,02 = <b>+3,1</b> cada uno.</p>
+  </div>
+
+  <div class="row" style="margin-top:5mm;">
+    <div class="col panel y">
+      <span class="tag">🃏 COMODÍN x2</span>
+      <p>Cada jugador tiene <b>uno por noche</b>. Se declara <b>antes</b> de la ronda marcando tu nombre bajo esa ronda. Tus puntos de copa de esa ronda <b>valen doble, para bien o para mal</b>.</p>
+      <ul class="small">
+        <li>Es individual: tu compañero puede no usarlo.</li>
+        <li>No se puede usar en la final (ya vale doble).</li>
+        <li>No toca el Nivel: solo multiplica la copa.</li>
+      </ul>
+    </div>
+    <div class="col panel r">
+      <span class="tag">🥊 DESAFÍO</span>
+      <p>Opción de la Pareja Fija: un <b>partido largo</b> (2 sets) en que el <b>último de la copa elige con quién jugar</b> (la app te dice quién es) y los otros dos forman la pareja rival. Ideal para la última fecha del mes, cuando el que va último necesita un milagro.</p>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:3mm; align-items:flex-start;">
+    <div class="say col">
+      <svg class="char" viewBox="0 0 120 160" width="60" height="80"><use href="#cool"/></svg>
+      <div class="bubble">Comodín en la ronda que me toca con el más débil contra los dos mejores. Si se espera poco de nosotros, cualquier cosa es ganancia.</div>
+    </div>
+    <div class="say rev col">
+      <svg class="char" viewBox="0 0 120 120" width="52" height="52"><use href="#pelota"/></svg>
+      <div class="bubble">Buena lectura. El comodín no premia ganar: dobla lo que hagas <b>contra lo esperado</b>. Úsalo cuando te sientas bien, no cuando la pareja se vea fuerte.</div>
+    </div>
+  </div>
+  <div class="num">6</div>
+</section>
+
+<!-- ==================== 7. PLAN DE 90 MINUTOS ==================== -->
+<section class="page">
+  <h2>El plan de 90 minutos</h2>
+  <p class="lead">La cancha dura <b>90 minutos</b>. La app reserva <b>10 para calentar y cambios</b> y reparte los otros 80 entre las rondas. El ritmo (unos <b>2,2 minutos por game</b>) lo midió en nuestro propio historial.</p>
+
+  <table style="margin-top:3mm; font-size:10.5pt;">
+    <tr><th>Modalidad</th><th class="c">Rondas</th><th class="c">Minutos por ronda</th><th class="c">Por games</th><th class="c">Por puntos</th></tr>
+    <tr><td>🔄 Americana</td><td class="c">3</td><td class="c">26</td><td class="c">≈ 12 games</td><td class="c">a 52 puntos</td></tr>
+    <tr><td>🏁 Americana con final</td><td class="c">3 + final</td><td class="c">20</td><td class="c">≈ 9 games</td><td class="c">a 40 puntos</td></tr>
+    <tr><td>🌶️ Mexicano</td><td class="c">5</td><td class="c">16</td><td class="c">≈ 7 games</td><td class="c">a 32 puntos</td></tr>
+    <tr><td>⚔️ Pareja Fija / 🥊 Desafío</td><td class="c" colspan="4">2 sets con punto de oro; si quedan 1–1, súper tie-break a 10 (se anota como un set 1–0)</td></tr>
+  </table>
+
+  <div class="row" style="margin-top:5mm;">
+    <div class="col panel">
+      <span class="tag">REGLA DEL RELOJ</span>
+      <p>En las rondas por games, se juega por <b>tiempo</b>: cuando suena la alarma, <b>se termina el game en curso</b> y se anota lo que haya. Por eso las rondas no tienen por qué terminar 6–x: un 7–5 o un 6–6 son perfectamente válidos.</p>
+      <p>Como la liga compara contra lo esperado <b>en proporción</b> a los games jugados, da lo mismo que una ronda tenga 10 o 13 games.</p>
+    </div>
+    <div class="col panel y">
+      <span class="tag">¿CUÁL ELIJO?</span>
+      <ul>
+        <li><b>Noche normal:</b> americana (todos con todos).</li>
+        <li><b>Con ganas de cierre épico:</b> americana con final.</li>
+        <li><b>Muchos cambios y tabla en vivo:</b> mexicano.</li>
+        <li><b>Diferencias grandes de nivel:</b> súmale ventaja en cancha.</li>
+        <li><b>Rondas que terminan siempre a la misma hora:</b> por puntos.</li>
+        <li><b>Último lunes del mes:</b> desafío.</li>
+      </ul>
+    </div>
+  </div>
+
+  <svg viewBox="0 0 500 150" style="width:100%; margin-top:4mm;">
+    <rect x="10" y="40" width="480" height="40" rx="6" fill="#fff" stroke="#1f2937" stroke-width="2.5"/>
+    <rect x="10" y="40" width="53" height="40" rx="6" fill="#d1d5db" stroke="#1f2937" stroke-width="2.5"/>
+    <text x="36" y="65" font-size="12" text-anchor="middle" font-family="Chalkboard SE">10'</text>
+    <rect x="63" y="40" width="142" height="40" fill="#99f6e4" stroke="#1f2937" stroke-width="2.5"/>
+    <rect x="205" y="40" width="142" height="40" fill="#5eead4" stroke="#1f2937" stroke-width="2.5"/>
+    <rect x="347" y="40" width="143" height="40" rx="0" fill="#2dd4bf" stroke="#1f2937" stroke-width="2.5"/>
+    <text x="134" y="65" font-size="14" text-anchor="middle" font-family="Marker Felt">Ronda 1 · 26'</text>
+    <text x="276" y="65" font-size="14" text-anchor="middle" font-family="Marker Felt">Ronda 2 · 26'</text>
+    <text x="418" y="65" font-size="14" text-anchor="middle" font-family="Marker Felt">Ronda 3 · 26'</text>
+    <text x="10" y="30" font-size="13" font-family="Chalkboard SE">Americana (3 rondas): así se ven los 90 minutos</text>
+    <use href="#pelota" x="440" y="88" width="50" height="50"/>
+    <text x="430" y="118" font-size="12" text-anchor="end" font-family="Chalkboard SE">Sobran 2 minutos: para discutir el último punto.</text>
+  </svg>
+  <div class="num">7</div>
+</section>
+
+<!-- ==================== 8. COPA DEL MES ==================== -->
+<section class="page">
+  <h2>La Copa del mes</h2>
+  <p class="lead">Cada <b>mes calendario</b> es una copa. La gana quien <b>más puntos de liga suma</b> en las fechas de ese mes. Simple.</p>
+
+  <div class="row" style="align-items:center;">
+    <div class="col" style="flex:0.7;" >
+      <svg viewBox="0 0 160 190" style="width:100%;">
+        <path d="M40 20 H120 V60 Q120 105 80 110 Q40 105 40 60 Z" fill="#fbbf24" stroke="#1f2937" stroke-width="3"/>
+        <path d="M40 30 Q10 30 14 55 Q18 78 44 80" stroke="#1f2937" stroke-width="5" fill="none"/>
+        <path d="M120 30 Q150 30 146 55 Q142 78 116 80" stroke="#1f2937" stroke-width="5" fill="none"/>
+        <rect x="72" y="108" width="16" height="30" fill="#fbbf24" stroke="#1f2937" stroke-width="3"/>
+        <rect x="48" y="138" width="64" height="18" rx="3" fill="#92400e" stroke="#1f2937" stroke-width="3"/>
+        <text x="80" y="70" font-size="26" text-anchor="middle" font-family="Marker Felt">MES</text>
+        <path d="M58 32 Q60 50 66 60" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.7"/>
+        <use href="#pelota" x="110" y="128" width="50" height="50"/>
+      </svg>
+    </div>
+    <div class="col" style="flex:1.3;">
+      <div class="panel">
+        <span class="tag">LAS REGLAS</span>
+        <ul>
+          <li>Suman los puntos de todas las rondas del mes (con la final y los comodines ya multiplicados).</li>
+          <li>Para que haya campeón se necesitan <b>al menos 2 fechas</b> jugadas en el mes, sin contar las de calibración. Con una sola fecha, el mes queda <b>sin campeón</b>.</li>
+          <li>El campeón se corona cuando el mes <b>termina</b>. Mientras tanto la copa aparece <b>🎾 en juego</b>.</li>
+          <li>Los partidos en modo Libre no cuentan.</li>
+          <li>En la pestaña Liga hay un selector para mirar las copas de meses anteriores.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel o" style="margin-top:4mm;">
+    <span class="tag">⚙️ CALIBRACIÓN</span>
+    <p>Las <b>3 primeras fechas de la liga</b> (las primeras de toda la historia, no de cada mes) fueron de <b>calibración</b>: sirvieron para que el Nivel de cada uno se acomodara a la realidad. En esas fechas los puntos <b>mueven el Nivel pero no dan copa ni premios</b>.</p>
+    <div class="say">
+      <svg class="char" viewBox="0 0 120 160" width="56" height="75"><use href="#pato"/></svg>
+      <div class="bubble">Tiene sentido: si todos parten en 1000, las primeras semanas la predicción es pésima. Sería injusto dar copa con eso.</div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:4mm;">
+    <div class="col panel b">
+      <span class="tag">PUNTOS ≠ NIVEL</span>
+      <p>Los <b>puntos de copa</b> se reinician cada mes. El <b>Nivel</b>, no: viaja contigo toda la vida. Ganar la copa de octubre no te sirve en noviembre, pero el Nivel que subiste en octubre sí te hace más difícil sumar en noviembre.</p>
+    </div>
+    <div class="col panel p">
+      <span class="tag">¿POR QUÉ SUMA CERO?</span>
+      <p>Lo que gana una pareja lo pierde la otra, así que el Nivel total del grupo se mantiene. Con la final y el comodín la <b>copa</b> deja de ser suma cero (se multiplican puntos), pero el <b>Nivel</b> sigue siéndolo.</p>
+    </div>
+  </div>
+
+  <div class="say rev" style="margin-top:2mm;">
+    <svg class="char" viewBox="0 0 120 160" width="58" height="77"><use href="#oso"/></svg>
+    <div class="bubble">¿Y si quedo último toda la temporada? — <i>Se te baja el nivel, y el mes siguiente te cuesta mucho menos sumar. La liga está diseñada para que cualquiera pueda ganar una copa.</i></div>
+  </div>
+  <div class="num">8</div>
+</section>
+
+<!-- ==================== 9. PREMIOS Y VITRINA ==================== -->
+<section class="page">
+  <h2>Premios de cada fecha</h2>
+  <p class="lead">Cada fecha (fuera de la calibración) reparte hasta <b>cuatro premios</b>. Aparecen en la pestaña Liga y se van acumulando en la vitrina.</p>
+
+  <div class="row" style="margin-top:4mm;">
+    <div class="col panel y">
+      <span class="tag">🏅 FIGURA</span>
+      <p>El jugador que <b>más puntos sumó</b> en la fecha. Tiene que terminar en positivo: si todos restaron, no hay figura.</p>
+      <div class="say">
+        <svg class="char" viewBox="0 0 120 160" width="50" height="67"><use href="#cool"/></svg>
+        <div class="bubble">Figura otra vez. Mándenme la medalla a la casa.</div>
+      </div>
+    </div>
+    <div class="col panel r">
+      <span class="tag">🥄 CUCHARA DE PALO</span>
+      <p>El jugador que <b>menos puntos</b> sacó en la fecha, si terminó en negativo. El premio que nadie quiere, pero que todos van a recordar.</p>
+      <div class="say">
+        <svg class="char" viewBox="0 0 120 160" width="50" height="67"><use href="#zorro"/></svg>
+        <div class="bubble think">La voy a colgar en la pared. Como motivación.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:4mm;">
+    <div class="col panel g">
+      <span class="tag">🗡️ MATAGIGANTES</span>
+      <p>La <b>pareja no favorita</b> que más superó lo esperado en una ronda. Condiciones:</p>
+      <ul class="small">
+        <li>Tiene que haber un favorito de verdad: unos 14 puntos de Nivel de diferencia o más (si están casi parejas, no hay gigante).</li>
+        <li>Tiene que haber sacado al menos <b>un game más</b> de lo esperado (6 puntos o más; en rondas por puntos, 2 puntos de juego más).</li>
+      </ul>
+      <p class="small">Se lo llevan los dos integrantes.</p>
+    </div>
+    <div class="col panel o">
+      <span class="tag">🔨 PALIZA</span>
+      <p>La ronda <b>más desigual</b> de la fecha. Para contar, la ronda debe tener al menos <b>6 games</b> y la diferencia debe ser de al menos <b>un tercio</b> de los games jugados (por ejemplo, 8–4 en 12 games).</p>
+      <p class="small">Se la llevan los dos ganadores. Si todo fue parejo, no hay paliza (y la fecha puede quedar sin premios: <i>«fecha pareja»</i>).</p>
+    </div>
+  </div>
+
+  <h2 style="margin-top:6mm; font-size:19pt;">La vitrina 🏛️</h2>
+  <div class="row" style="align-items:center;">
+    <div class="col" style="flex:1.4;">
+      <p>Es el museo de la liga: para cada jugador cuenta, desde el comienzo, cuántas <b>🏆 copas</b>, <b>🏅 figuras</b>, <b>🗡️ matagigantes</b>, <b>🔨 palizas</b> y <b>🥄 cucharas</b> lleva. Se ordena por copas, después figuras, después matagigantes.</p>
+      <table style="font-size:9.5pt;">
+        <tr><th>Jugador</th><th class="c">🏆</th><th class="c">🏅</th><th class="c">🗡️</th><th class="c">🔨</th><th class="c">🥄</th></tr>
+        <tr><td>😎 Ejemplo A</td><td class="c">2</td><td class="c">5</td><td class="c">1</td><td class="c">3</td><td class="c">0</td></tr>
+        <tr><td>🦆 Ejemplo B</td><td class="c">1</td><td class="c">3</td><td class="c">4</td><td class="c">1</td><td class="c">2</td></tr>
+      </table>
+      <p class="small">(Números inventados: los de verdad están en la app.)</p>
+    </div>
+    <div class="col">
+      <div class="say rev">
+        <svg class="char" viewBox="0 0 120 160" width="58" height="77"><use href="#oso"/></svg>
+        <div class="bubble">Yo voy por el récord de matagigantes. Es el premio de los que saben sufrir.</div>
+      </div>
+    </div>
+  </div>
+  <div class="num">9</div>
+</section>
+
+<!-- ==================== 10. EL RESTO DE LA APP ==================== -->
+<section class="page">
+  <h2>El resto de la app</h2>
+
+  <div class="panel" style="margin-top:3mm;">
+    <span class="tag">📋 TABLA CLÁSICA (3-1-0)</span>
+    <p>Para los nostálgicos: la tabla de siempre, por <b>rondas</b>. Ronda ganada = <b>3</b>, empatada = <b>1</b>, perdida = <b>0</b> (los valores se cambian en Config). Desempata la <b>diferencia de games</b> y después las victorias. Se puede filtrar por temporada. No tiene hándicap: aquí ganar es ganar.</p>
+  </div>
+
+  <h3 style="margin-top:5mm;">📈 La pestaña Análisis</h3>
+  <div class="row">
+    <div class="col panel b">
+      <span class="tag">📊 NIVEL</span>
+      <p>El Nivel actual de cada uno, cuánto ha subido o bajado desde 1000 y un gráfico de su evolución fecha a fecha.</p>
+    </div>
+    <div class="col panel g">
+      <span class="tag">🎯 COMPAÑEROS</span>
+      <p>Matriz con el % de rondas ganadas de cada combinación de pareja (un empate cuenta como media). Verde = química. Rojo = mejor no. Solo muestra a los jugadores activos.</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col panel y">
+      <span class="tag">🔥 FORMA Y RACHAS</span>
+      <p>Las últimas 5 rondas de cada uno (V, E, D) y sus rachas. También la evolución de puntos acumulados y la distribución de márgenes de games.</p>
+    </div>
+    <div class="col panel p">
+      <span class="tag">🧠 CONTRA LO ESPERADO</span>
+      <p>Games reales contra games esperados, sumados de toda la historia. Dice quién rinde más de lo que su nivel promete.</p>
+    </div>
+  </div>
+
+  <div class="panel o" style="margin-top:4mm;">
+    <span class="tag">🔮 PREDICTOR</span>
+    <div class="row" style="margin:1mm 0; align-items:center;">
+      <div class="col" style="flex:1.5;">
+        <p>Arma un 2 contra 2 hipotético y la app te dice el <b>marcador esperado</b> con el Nivel actual. Útil para armar parejas parejas… o para saber cuánto tienes que ganar para sumar.</p>
+      </div>
+      <div class="col">
+        <div class="say rev">
+          <svg class="char" viewBox="0 0 120 160" width="52" height="69"><use href="#pato"/></svg>
+          <div class="bubble">Lo uso antes de entrar a la cancha: así sé cuál es mi meta real.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:5mm;">⚙️ Config y cuidado de los datos</h3>
+  <ul>
+    <li><b>Temporadas:</b> se crean y activan para filtrar la tabla clásica y el historial. La liga con hándicap no depende de ellas: corre por meses.</li>
+    <li><b>Sincronización:</b> muestra si Firebase está conectado. Si no, los datos viven solo en ese navegador.</li>
+    <li><b>Exportar / Importar:</b> descarga un respaldo en JSON. Hazlo de vez en cuando.</li>
+    <li><b>Editar un partido:</b> desde el Historial. Como todo se recalcula desde cero, corregir un marcador ajusta niveles, copas y premios de ahí en adelante.</li>
+  </ul>
+  <div class="warn"><b>🗑️ Borrar TODO</b> hace exactamente eso. No hay deshacer. Si lo aprietas sin un respaldo exportado, invitas el asado para siempre.</div>
+  <div class="num">10</div>
+</section>
+
+<!-- ==================== 11. PREGUNTAS FRECUENTES ==================== -->
+<section class="page">
+  <h2>Preguntas frecuentes (y alegatos típicos)</h2>
+
+  <div class="say">
+    <svg class="char" viewBox="0 0 120 160" width="54" height="72"><use href="#oso"/></svg>
+    <div class="bubble"><b>«Gané las tres rondas y quedé con puntos negativos. ¡Esto está arreglado!»</b><br>No está arreglado: tu nivel era alto y ganaste por menos de lo esperado. Ganaste el partido, pero no le ganaste a la predicción. La semana que viene se espera un poco menos de ti.</div>
+  </div>
+  <div class="say rev">
+    <svg class="char" viewBox="0 0 120 160" width="54" height="72"><use href="#zorro"/></svg>
+    <div class="bubble"><b>«¿Me conviene dejarme perder para bajar mi nivel?»</b><br>No. Para bajar el nivel tienes que restar puntos, y esos puntos restan en la copa de ese mes. Le regalas puntos a los rivales hoy para, quizás, recuperarlos después. Mal negocio.</div>
+  </div>
+  <div class="say">
+    <svg class="char" viewBox="0 0 120 160" width="54" height="72"><use href="#pato"/></svg>
+    <div class="bubble"><b>«¿Por qué mi compañero y yo sumamos lo mismo si él jugó pésimo?»</b><br>Porque la app solo ve el marcador de la pareja. Los dos suman o restan igual en esa ronda. La única diferencia individual es el comodín.</div>
+  </div>
+  <div class="say rev">
+    <svg class="char" viewBox="0 0 120 160" width="54" height="72"><use href="#cool"/></svg>
+    <div class="bubble"><b>«Faltó uno y jugamos con un invitado. ¿Qué hago?»</b><br>Agrégalo en Jugadores. Parte en 1000 como todos y entra al cálculo normal. Si no va a volver, después lo desactivas: sus partidos siguen contando.</div>
+  </div>
+  <div class="say">
+    <svg class="char" viewBox="0 0 120 120" width="50" height="50"><use href="#pelota"/></svg>
+    <div class="bubble"><b>«Anotamos mal un marcador de hace tres semanas.»</b><br>Edítalo en el Historial. Todo (niveles, copas, premios, vitrina) se recalcula desde cero, como si siempre hubiera sido así.</div>
+  </div>
+  <div class="say rev">
+    <svg class="char" viewBox="0 0 120 160" width="54" height="72"><use href="#zorro"/></svg>
+    <div class="bubble"><b>«¿Jugar dos partidos el mismo día cuenta como dos fechas?»</b><br>No: todo lo que se juega en el mismo día es <b>una sola fecha</b>. Los premios se reparten una vez por día.</div>
+  </div>
+  <div class="say">
+    <svg class="char" viewBox="0 0 120 160" width="54" height="72"><use href="#oso"/></svg>
+    <div class="bubble"><b>«¿El comodín sube mi nivel al doble?»</b><br>No. El comodín y la final multiplican solo los puntos de copa. El Nivel se mueve siempre por lo jugado, sin multiplicadores.</div>
+  </div>
+  <div class="num">11</div>
+</section>
+
+<!-- ==================== 12. TORPEDO ==================== -->
+<section class="page" style="background:#fef9c3; background-image:none;">
+  <h2>El torpedo (para el bolsillo)</h2>
+  <div class="row">
+    <div class="col panel">
+      <span class="tag">EL NIVEL</span>
+      <ul>
+        <li>Todos parten en <b>1000</b>. Pareja = promedio.</li>
+        <li>La app predice qué % de games saca cada pareja.</li>
+        <li><b>+6 puntos</b> por cada game sobre lo esperado (por puntos: <b>+3</b> por punto).</li>
+        <li>Lo que suma una pareja lo resta la otra.</li>
+        <li>Se puede <b>sumar perdiendo</b> y <b>restar ganando</b>.</li>
+        <li>+100 de nivel ≈ se espera el 64 % de los games.</li>
+      </ul>
+    </div>
+    <div class="col panel">
+      <span class="tag">LA COPA</span>
+      <ul>
+        <li>Una por mes calendario.</li>
+        <li>Gana quien más puntos suma en el mes.</li>
+        <li>Mínimo <b>2 fechas</b> (sin calibración) para que haya campeón.</li>
+        <li>Primeras 3 fechas de la liga: calibración, sin copa.</li>
+        <li>Final = <b>x2</b> para los cuatro. Comodín = <b>x2</b> para quien lo usa.</li>
+        <li>Libre no cuenta.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col panel">
+      <span class="tag">MODALIDADES</span>
+      <ul>
+        <li>🔄 <b>Americana:</b> 3 rondas, todos con todos.</li>
+        <li>🏁 <b>Con final:</b> +1 ronda, 1.º+4.º vs 2.º+3.º.</li>
+        <li>🌶️ <b>Mexicano:</b> 5 rondas: la 1.ª por Nivel, las demás por la tabla.</li>
+        <li>⚔️ <b>Pareja fija:</b> 2 sets + súper tie-break.</li>
+        <li>🥊 <b>Desafío:</b> el último de la copa elige compañero.</li>
+        <li>⚖️ <b>Ventaja:</b> el no favorito parte arriba.</li>
+        <li>🔢 <b>Por puntos:</b> puntos corridos, saque cada 4.</li>
+      </ul>
+    </div>
+    <div class="col panel">
+      <span class="tag">PREMIOS</span>
+      <ul>
+        <li>🏅 <b>Figura:</b> más puntos de la fecha.</li>
+        <li>🥄 <b>Cuchara:</b> menos puntos (en negativo).</li>
+        <li>🗡️ <b>Matagigantes:</b> el no favorito que superó lo esperado por 1 game o más.</li>
+        <li>🔨 <b>Paliza:</b> la ronda más desigual (diferencia ≥ ⅓).</li>
+        <li>🏛️ <b>Vitrina:</b> el conteo de toda la vida.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel g" style="margin-top:3mm;">
+    <span class="tag">LA NOCHE, PASO A PASO</span>
+    <p style="margin:1mm 0;">① Pestaña <b>Cargar</b> → fecha y modalidad. ② Marca quiénes juegan. ③ Prende las opciones (final, ventaja, por puntos). ④ Mira el plan de minutos y pon la alarma. ⑤ Antes de cada ronda, quien quiera toca su nombre para el <b>comodín</b>. ⑥ Anota cada marcador (con ventaja incluida, si la hay). ⑦ En mexicano o con final, aprieta el botón para que la app arme la siguiente ronda. ⑧ <b>Guardar partido</b> y a mirar la pestaña Liga.</p>
+  </div>
+
+  <svg viewBox="0 0 500 130" style="width:100%; margin-top:3mm;">
+    <use href="#oso" x="20" y="0" width="90" height="120"/>
+    <use href="#pato" x="110" y="0" width="90" height="120"/>
+    <use href="#pelota" x="215" y="30" width="70" height="70"/>
+    <use href="#zorro" x="300" y="0" width="90" height="120"/>
+    <use href="#cool" x="390" y="0" width="90" height="120"/>
+  </svg>
+  <p class="center" style="font-family:'Marker Felt'; font-size:17pt; margin:0;">¡Nos vemos el lunes!</p>
+  <div class="num">12</div>
+</section>
+
+</body>
+</html>
