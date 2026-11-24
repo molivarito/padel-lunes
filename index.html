@@ -399,6 +399,33 @@
   @media (min-width: 640px) {
     .modality-selector { grid-template-columns: repeat(4, 1fr); }
   }
+  .handicap-line {
+    font-size: 0.78rem;
+    color: var(--muted);
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 6px 8px;
+    margin-top: 8px;
+  }
+  .round-liga {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 0 0 6px 8px;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .opts-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px 0; }
+  .opt-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.82rem; font-weight: 600;
+    padding: 7px 10px; border-radius: 999px;
+    border: 1.5px solid var(--border); background: var(--card, #fff);
+    cursor: pointer; margin: 0;
+  }
+  .opt-chip.on { border-color: var(--primary); background: var(--bg); }
+  .opt-chip input { width: auto; margin: 0; }
+  .comodin-row { font-size: 0.78rem; color: var(--muted); margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .comodin-chip { padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); cursor: pointer; background: var(--card, #fff); color: var(--text); }
+  .comodin-chip.on { background: #f59e0b; border-color: #f59e0b; color: #fff; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -429,9 +456,23 @@
       <div class="modality-selector">
         <div class="modality-btn active" data-mod="americana"><span class="emoji">🔄</span>Americana</div>
         <div class="modality-btn" data-mod="fijo"><span class="emoji">⚔️</span>Pareja Fija</div>
-        <div class="modality-btn" data-mod="roundrobin"><span class="emoji">🎯</span>Round Robin</div>
+        <div class="modality-btn" data-mod="mexicano"><span class="emoji">🌶️</span>Mexicano</div>
         <div class="modality-btn" data-mod="libre"><span class="emoji">📝</span>Libre</div>
       </div>
+
+      <div id="optsBlock"></div>
+      <details style="margin:6px 0 12px 0;">
+        <summary>📖 Modalidades y reglas</summary>
+        <div style="font-size:0.84rem; line-height:1.5; margin-top:8px;">
+          <p style="margin:6px 0;"><b>🔄 Americana.</b> Tres rondas, cada uno juega una vez con cada compañero.</p>
+          <p style="margin:6px 0;"><b>🏁 Con final.</b> Después de las tres rondas se juega una cuarta: 1.º y 4.º de la noche contra 2.º y 3.º. Sus puntos de copa valen doble.</p>
+          <p style="margin:6px 0;"><b>🌶️ Mexicano.</b> Cinco rondas cortas. La primera se arma por nivel y las siguientes por la tabla de la noche: siempre 1.º con 4.º contra 2.º con 3.º.</p>
+          <p style="margin:6px 0;"><b>⚖️ Ventaja en cancha.</b> La pareja no favorita parte con games (o puntos) arriba, los que la app calcula. Se anota el marcador final de la cancha; la ronda la gana quien termina arriba, y para la copa se descuenta la ventaja.</p>
+          <p style="margin:6px 0;"><b>🔢 Por puntos.</b> En vez de games, cada ronda se juega a una cantidad fija de puntos corridos; el saque cambia cada 4. Se anotan los puntos de cada pareja.</p>
+          <p style="margin:6px 0;"><b>🃏 Comodín x2.</b> Cada jugador tiene uno por noche. Se declara antes de la ronda tocando su nombre: sus puntos de copa de esa ronda valen doble, para bien o para mal. No se puede usar en la final.</p>
+          <p style="margin:6px 0;"><b>🥊 Desafío.</b> Un partido largo de pareja fija; el último de la copa elige compañero. Ideal para la última fecha del mes.</p>
+        </div>
+      </details>
 
       <div class="field">
         <label>Jugadores que participan</label>
@@ -442,6 +483,7 @@
       <div id="americanaBlock" style="display:none;">
         <h3>Rondas (parejas generadas automáticamente)</h3>
         <div id="americanaRounds"></div>
+        <div id="roundsExtra"></div>
         <button class="btn-secondary btn-sm" onclick="regenerateRounds()" style="margin-top:8px;">🎲 Re-generar parejas</button>
       </div>
 
@@ -467,7 +509,7 @@
         <div id="libreInputs"></div>
       </div>
 
-      <button class="btn-primary" onclick="saveMatch()" style="margin-top:16px;">💾 Guardar Partido</button>
+      <button class="btn-primary" id="saveBtn" onclick="saveMatch()" style="margin-top:16px;">💾 Guardar Partido</button>
     </div>
   </section>
 
@@ -486,7 +528,36 @@
   <!-- ============ VIEW: STATS ============ -->
   <section id="view-stats" class="view">
     <div class="card">
-      <h2>🏆 Tabla Histórica</h2>
+      <h2>🏆 <span id="copaTitle">Copa del mes</span></h2>
+      <div class="field">
+        <label>Copa</label>
+        <select id="copaFilter" onchange="onCopaChange(this.value)"></select>
+      </div>
+      <div id="copaTable"></div>
+      <details style="margin-top:12px;">
+        <summary>¿Cómo se puntúa?</summary>
+        <div style="font-size:0.85rem; margin-top:10px; line-height:1.5;">
+          <p style="margin:6px 0;">Cada jugador tiene un <b>Nivel</b> (todos partieron en 1000). Antes de cada ronda, la app usa el nivel de las dos parejas para calcular <b>qué marcador se espera</b>.</p>
+          <p style="margin:6px 0;">Si tu pareja saca <b>más games que lo esperado</b>, los dos suman; si saca menos, restan, aunque hayan ganado la ronda. Son <b>6 puntos por cada game</b> de diferencia con lo esperado, y lo que suma una pareja lo resta la otra.</p>
+          <p style="margin:6px 0;">En las rondas <b>por puntos</b> son 3 puntos de copa por cada punto sobre lo esperado. La <b>final</b> vale doble para los cuatro y el <b>comodín</b> dobla los puntos de quien lo usa; ninguno de los dos altera el Nivel.</p>
+          <p style="margin:6px 0;">Esos mismos puntos mueven tu Nivel, así que al que viene ganando se le sube la vara, y al que viene perdiendo se le baja.</p>
+          <p style="margin:6px 0;">La <b>Copa del mes</b> la gana quien más puntos suma en las fechas de ese mes. Se necesitan al menos 2 fechas para que haya campeón. Las 3 primeras fechas de la liga fueron de <b>calibración</b>: mueven el nivel, pero no dan puntos de copa.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>🎖️ Premios de cada fecha</h2>
+      <div id="ligaPremios"></div>
+    </div>
+
+    <div class="card">
+      <h2>🏛️ Vitrina</h2>
+      <div id="ligaVitrina"></div>
+    </div>
+
+    <div class="card">
+      <h2>📋 Tabla clásica (3-1-0)</h2>
       <div class="field">
         <label>Temporada</label>
         <select id="statsFilter"></select>
@@ -495,14 +566,14 @@
         <thead>
           <tr>
             <th>#</th><th>Jugador</th>
-            <th class="num">PJ</th><th class="num">G</th>
-            <th class="num">Pts</th><th class="num">%V</th>
+            <th class="num">PJ</th><th class="num">V-E-D</th>
+            <th class="num">Pts</th><th class="num">Dif</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
       <p style="font-size:0.75rem; color:var(--muted); margin-top:8px;">
-        PJ = partidos jugados · G = victorias · Pts = puntos · %V = porcentaje de victorias
+        PJ = rondas jugadas · V-E-D = victorias, empates, derrotas · Pts = puntos · Dif = games a favor menos games en contra (desempata)
       </p>
     </div>
 
@@ -593,36 +664,25 @@
   <!-- ============ VIEW: ANÁLISIS (NERD MODE) ============ -->
   <section id="view-analysis" class="view">
     <div class="card">
-      <h2>📊 ELO Ranking</h2>
+      <h2>📊 Nivel (hándicap)</h2>
       <details style="margin-bottom:12px;">
-        <summary>¿Qué es el ELO Ranking?</summary>
+        <summary>¿Cómo se calcula el Nivel?</summary>
         <div style="font-size:0.85rem; color:var(--text); margin-top:10px; line-height:1.5;">
-          <p style="margin:6px 0;">
-            El <b>ELO</b> es un sistema de puntuación creado por el físico Árpad Élő en 1960 para rankear jugadores de ajedrez. Hoy se usa en muchos deportes y juegos (FIDE, fútbol internacional, LoL, Counter-Strike, etc.) porque captura el nivel relativo entre competidores mejor que un simple % de victorias.
-          </p>
-          <p style="margin:6px 0;">
-            <b>Idea central:</b> cada jugador tiene un rating numérico. Cuando juegas, los ratings se ajustan según el resultado y según <i>qué tan probable era</i> ese resultado. Ganarle a alguien con mucho más rating te da muchos puntos; perder contra alguien con menos rating te quita muchos puntos. Si todos juegan a su nivel esperado, los ratings se mantienen estables.
-          </p>
-          <p style="margin:6px 0;"><b>La fórmula:</b></p>
-          <pre style="background:var(--bg); padding:10px; border-radius:8px; font-size:0.78rem; overflow-x:auto; margin:4px 0;">R_nuevo = R_actual + K · (S − E)
-
-E = 1 / (1 + 10^((R_rival − R_tuyo) / 400))</pre>
+          <p style="margin:6px 0;">Es un ELO adaptado al pádel en parejas que mira el <b>marcador de games</b>, no solo quién ganó la ronda.</p>
+          <pre style="background:var(--bg); padding:10px; border-radius:8px; font-size:0.78rem; overflow-x:auto; margin:4px 0;">E = 1 / (1 + 10^((N_rival − N_pareja) / 400))
+esperado = E · games jugados en la ronda
+puntos   = 6 · (games ganados − esperado)</pre>
           <ul style="margin:6px 0 6px 18px; padding:0;">
-            <li><b>R</b> = rating del jugador</li>
-            <li><b>K</b> = sensibilidad del ajuste (acá K = <b>32</b>, valor típico para ligas casuales)</li>
-            <li><b>S</b> = resultado real: <b>1</b> si ganaste, <b>0.5</b> empate, <b>0</b> si perdiste</li>
-            <li><b>E</b> = probabilidad esperada de ganar (entre 0 y 1) según la diferencia de rating</li>
+            <li><b>N_pareja</b> = promedio del nivel de los dos integrantes</li>
+            <li><b>E</b> = fracción de los games que la pareja debería ganar</li>
+            <li>Los puntos se suman al nivel de cada integrante y se restan a cada rival</li>
           </ul>
-          <p style="margin:6px 0;">
-            <b>En esta app (pádel doble):</b> todos parten con <b>1000</b>. Como jugamos en parejas, el rating del equipo es el promedio de sus 2 integrantes. Cada jugador actualiza su rating individualmente usando el resultado del equipo. Por ejemplo, si tu equipo (promedio 1000) gana contra uno de 1100, tu E ≈ 0.36 y tu rating sube 32 × (1 − 0.36) ≈ <b>+20.5 puntos</b>. Si pierdes contra un equipo de 900, bajas más que si pierdes contra uno de 1100.
-          </p>
-          <p style="margin:6px 0;">
-            <b>Interpretación rápida:</b> una diferencia de 100 puntos ELO ≈ 64% probabilidad de ganar. Diferencia de 200 ≈ 76%. Diferencia de 400 ≈ 91%.
-          </p>
+          <p style="margin:6px 0;">Ejemplo: si se esperaba 4–8 y la ronda terminó 5–7, la pareja que perdió suma 6 puntos cada uno y la que ganó resta 6.</p>
+          <p style="margin:6px 0;">Una ronda larga pesa más que una corta porque tiene más games; por eso un partido a varios sets cuenta en proporción a lo que se jugó.</p>
         </div>
       </details>
       <p style="font-size:0.8rem; color:var(--muted); margin:0 0 10px 0;">
-        Inicial: 1000 · K: 32 · Empate vale 0.5 · Recalculado desde cero con cada cambio del historial.
+        Inicial: 1000 · 6 puntos por game sobre lo esperado · Recalculado desde cero con cada cambio del historial.
       </p>
       <div id="eloTable"></div>
       <div class="chart-container" style="margin-top:14px;">
@@ -661,14 +721,14 @@ E = 1 / (1 + 10^((R_rival − R_tuyo) / 400))</pre>
     </div>
 
     <div class="card">
-      <h2>🧠 Performance vs Expected</h2>
+      <h2>🧠 Rendimiento contra lo esperado</h2>
       <div id="perfTable"></div>
     </div>
 
     <div class="card">
       <h2>🔮 Predictor de Partidos</h2>
       <p style="font-size:0.8rem; color:var(--muted); margin:0 0 10px 0;">
-        Arma un 2 vs 2 hipotético. La probabilidad de victoria sale de los ratings ELO actuales.
+        Arma un 2 vs 2 hipotético. El marcador esperado sale del nivel actual de cada uno.
       </p>
       <h3>Equipo A</h3>
       <div id="predTeamA" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
@@ -682,7 +742,7 @@ E = 1 / (1 + 10^((R_rival − R_tuyo) / 400))</pre>
 <nav class="tabs">
   <button class="active" data-view="new"><span class="tab-icon">➕</span>Cargar</button>
   <button data-view="history"><span class="tab-icon">📅</span>Historial</button>
-  <button data-view="stats"><span class="tab-icon">🏆</span>Stats</button>
+  <button data-view="stats"><span class="tab-icon">🏆</span>Liga</button>
   <button data-view="analysis"><span class="tab-icon">📈</span>Análisis</button>
   <button data-view="players"><span class="tab-icon">👥</span>Jugadores</button>
   <button data-view="config"><span class="tab-icon">⚙️</span>Config</button>
@@ -900,9 +960,9 @@ function fmtRecord(r) {
 }
 function fmtDate(d) {
   if (!d) return '';
-  const dt = new Date(d);
+  const dt = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d + 'T12:00:00') : new Date(d);
   if (isNaN(dt)) return d;
-  return dt.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+  return dt.toLocaleDateString('es-CL', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 /* ==================================================================
@@ -926,14 +986,16 @@ document.querySelectorAll('nav.tabs button').forEach(btn => {
    RENDER MAESTRO
    ================================================================== */
 function renderAll() {
+  STATE.liga = computeLiga(STATE.matches, STATE.players.map(p => p.id), localDateStr());
   renderHeader();
   renderPlayerSelector();
   renderFijoSelectors();
-  renderLibreInputs();
+  renderOpts();
   renderAmericanaRounds();
   renderFijoSets();
   renderMatchHistory();
   renderLeaderboard();
+  renderLiga();
   renderAdvStats();
   renderPlayersList();
   renderSeasons();
@@ -961,16 +1023,17 @@ document.querySelectorAll('.modality-btn').forEach(b => {
   });
 });
 
-function updateModalityBlocks() {
+function updateModalityBlocks(keepRounds) {
   const m = STATE.currentModality;
-  document.getElementById('americanaBlock').style.display = (m === 'americana' || m === 'roundrobin') ? 'block' : 'none';
+  document.getElementById('americanaBlock').style.display = (isRondas(m)) ? 'block' : 'none';
   document.getElementById('fijoBlock').style.display = (m === 'fijo') ? 'block' : 'none';
   document.getElementById('libreBlock').style.display = (m === 'libre') ? 'block' : 'none';
-  if (m === 'americana' || m === 'roundrobin') {
-    generateRounds();
+  if (isRondas(m)) {
+    if (!keepRounds) generateRounds();
     renderAmericanaRounds();
   }
   if (m === 'libre') renderLibreInputs();
+  renderOpts();
 }
 
 /* ==================================================================
@@ -992,7 +1055,7 @@ function renderPlayerSelector() {
         STATE.matchDraft.selectedPlayers.push(p.id);
       }
       renderPlayerSelector();
-      if (STATE.currentModality === 'americana' || STATE.currentModality === 'roundrobin') {
+      if (isRondas(STATE.currentModality)) {
         generateRounds();
         renderAmericanaRounds();
       }
@@ -1037,24 +1100,155 @@ function generatePairings(playerIds) {
   return rounds;
 }
 
+function isRondas(m) { return m === 'americana' || m === 'roundrobin' || m === 'mexicano'; }
+
+function draftOpts() {
+  if (!STATE.matchDraft.opts) STATE.matchDraft.opts = { final:false, ventaja:false, puntos:false, desafio:false };
+  return STATE.matchDraft.opts;
+}
+
+// Reparto de los 90 minutos según modalidad y opciones
+function nightPlan() {
+  const m = STATE.currentModality, o = draftOpts();
+  const rounds = m === 'mexicano' ? 5 : (o.final ? 4 : 3);
+  const min = Math.floor((LIGA.MINUTOS - 10) / rounds);
+  return { rounds, min, games: Math.round(min / LIGA.MIN_POR_GAME), puntos: Math.floor(min * 2 / 4) * 4 };
+}
+function roundSize() { const p = nightPlan(); return draftOpts().puntos ? p.puntos : p.games; }
+function currentRatings() { return STATE.liga ? STATE.liga.ratings : {}; }
+
+// Aplica a una ronda del borrador la unidad (games/puntos) y la ventaja en cancha
+function decorateRound(r) {
+  const o = draftOpts();
+  if (o.puntos) r.unit = 'puntos'; else delete r.unit;
+  delete r.adv;
+  if (o.ventaja) {
+    const adv = ligaVentaja(r.teamA, r.teamB, currentRatings(), roundSize(), r.unit);
+    if (adv) r.adv = adv;
+  }
+  return r;
+}
+
 function generateRounds() {
   const sel = STATE.matchDraft.selectedPlayers;
+  const empty = () => [{a:'',b:''}];
   if (sel.length < 4) {
     STATE.matchDraft.rounds = [];
     return;
   }
-  if (sel.length === 4) {
+  if (STATE.currentModality === 'mexicano') {
+    if (sel.length !== 4) { STATE.matchDraft.rounds = []; return; }
+    // Ronda 1 por nivel: 1.º+4.º vs 2.º+3.º
+    const R = currentRatings();
+    const o = [...sel].sort((x,y) => (R[y] ?? LIGA.INIT) - (R[x] ?? LIGA.INIT));
+    STATE.matchDraft.rounds = [{ teamA:[o[0],o[3]], teamB:[o[1],o[2]], sets: empty() }];
+  } else if (sel.length === 4) {
     // 3 rondas: AB-CD, AC-BD, AD-BC
     const [a,b,c,d] = sel;
     STATE.matchDraft.rounds = [
-      { teamA:[a,b], teamB:[c,d], sets:[{a:'',b:''}] },
-      { teamA:[a,c], teamB:[b,d], sets:[{a:'',b:''}] },
-      { teamA:[a,d], teamB:[b,c], sets:[{a:'',b:''}] }
+      { teamA:[a,b], teamB:[c,d], sets: empty() },
+      { teamA:[a,c], teamB:[b,d], sets: empty() },
+      { teamA:[a,d], teamB:[b,c], sets: empty() }
     ];
   } else {
     STATE.matchDraft.rounds = generatePairings(sel);
   }
+  STATE.matchDraft.rounds.forEach(decorateRound);
 }
+
+// Tabla de la noche con lo anotado hasta ahora en el borrador
+function draftStanding() {
+  const d = STATE.matchDraft;
+  const rounds = d.rounds
+    .map(r => ({ ...r, sets: r.sets.filter(s => s.a !== '' && s.b !== '').map(s => ({ a:+s.a, b:+s.b })) }))
+    .filter(r => r.sets.length);
+  const others = STATE.matches.filter(x => x.id !== STATE.editingMatchId);
+  const L = computeLiga(
+    [...others, { id:'__draft', date:'9999-12-31', modality:'americana', rounds }],
+    STATE.players.map(p => p.id), localDateStr());
+  const f = L.fechas[L.fechas.length - 1];
+  const pts = (f && f.date === '9999-12-31') ? f.pts : {};
+  const order = [...d.selectedPlayers].sort((x,y) =>
+    (pts[y]||0) - (pts[x]||0) || (L.ratings[x] ?? LIGA.INIT) - (L.ratings[y] ?? LIGA.INIT));
+  return { scored: rounds.length, order, pts };
+}
+
+// Agrega una ronda 1.º+4.º vs 2.º+3.º de la noche (siguiente del mexicano, o la final)
+function addStandingRound(isFinal) {
+  const d = STATE.matchDraft;
+  if (d.selectedPlayers.length !== 4) { toast('Se necesitan exactamente 4 jugadores'); return; }
+  const st = draftStanding();
+  if (st.scored < d.rounds.length) { toast('Anota primero el marcador de las rondas jugadas'); return; }
+  const o = st.order;
+  const r = { teamA:[o[0],o[3]], teamB:[o[1],o[2]], sets:[{a:'',b:''}] };
+  if (isFinal) r.final = true;
+  d.rounds.push(decorateRound(r));
+  renderAmericanaRounds();
+  toast(isFinal ? '🏁 Final armada' : '➕ Ronda armada según la tabla');
+}
+function removeLastRound() {
+  if (STATE.matchDraft.rounds.length <= 1) return;
+  STATE.matchDraft.rounds.pop();
+  renderAmericanaRounds();
+}
+
+function toggleComodin(rIdx, pid) {
+  const rounds = STATE.matchDraft.rounds, r = rounds[rIdx];
+  if (!r || r.final) return;
+  const had = (r.x2 || []).includes(pid);
+  rounds.forEach(x => { if (x.x2) { x.x2 = x.x2.filter(p => p !== pid); if (!x.x2.length) delete x.x2; } });
+  if (!had) r.x2 = [...(r.x2 || []), pid];
+  renderAmericanaRounds();
+}
+
+function setOpt(key, val) {
+  const o = draftOpts();
+  o[key] = !!val;
+  if (key === 'final' && !val) STATE.matchDraft.rounds = STATE.matchDraft.rounds.filter(r => !r.final);
+  STATE.matchDraft.rounds.forEach(decorateRound);
+  renderOpts();
+  renderAmericanaRounds();
+}
+
+function lastOfCopa() {
+  const L = STATE.liga;
+  const c = L && L.copas.length ? L.copas[L.copas.length - 1] : null;
+  if (!c) return null;
+  const pts = c.nFechas ? c.pts : c.ptsAll;
+  const ids = Object.keys(pts).sort((x,y) => pts[x] - pts[y]);
+  return ids.length ? ids[0] : null;
+}
+
+function renderOpts() {
+  const c = document.getElementById('optsBlock');
+  if (!c) return;
+  const m = STATE.currentModality, o = draftOpts(), p = nightPlan();
+  const chk = (key, label) =>
+    `<label class="opt-chip${o[key] ? ' on' : ''}"><input type="checkbox" ${o[key] ? 'checked' : ''} onchange="setOpt('${key}', this.checked)">${label}</label>`;
+  let html = '';
+  if (isRondas(m)) {
+    html += '<div class="opts-row">'
+      + (m !== 'mexicano' ? chk('final', '🏁 Con final') : '')
+      + chk('ventaja', '⚖️ Ventaja en cancha')
+      + chk('puntos', '🔢 Por puntos')
+      + '</div>';
+    const cuantas = m === 'mexicano' ? `${p.rounds} rondas` : (o.final ? '3 rondas + final' : '3 rondas');
+    const largo = o.puntos
+      ? `a <b>${p.puntos} puntos</b> cada una (unos ${p.min} min; el saque cambia cada 4)`
+      : `de <b>${p.min} minutos</b> cada una (unos ${p.games} games; cuando suena el tiempo se termina el game en curso)`;
+    html += `<div class="handicap-line" style="margin:0 0 10px 0;">⏱️ Plan para ${LIGA.MINUTOS} min: <b>${cuantas}</b> ${largo}. Quedan 10 min para calentar y cambios.</div>`;
+  } else if (m === 'fijo') {
+    const last = lastOfCopa();
+    html += '<div class="opts-row">' + chk('desafio', '🥊 Desafío de la noche') + '</div>';
+    html += `<div class="handicap-line" style="margin:0 0 10px 0;">⏱️ Plan para ${LIGA.MINUTOS} min: <b>2 sets</b> con punto de oro; si quedan 1-1, <b>súper tie-break a 10</b> (anótalo como un set 1-0).`
+      + (o.desafio && last ? ` Elige compañero el último de la copa: <b>${getPlayerName(last)}</b>.` : '') + '</div>';
+  }
+  c.innerHTML = html;
+}
+window.setOpt = setOpt;
+window.toggleComodin = toggleComodin;
+window.addStandingRound = addStandingRound;
+window.removeLastRound = removeLastRound;
 
 function regenerateRounds() {
   const sel = STATE.matchDraft.selectedPlayers;
@@ -1068,17 +1262,24 @@ function regenerateRounds() {
 
 function renderAmericanaRounds() {
   const c = document.getElementById('americanaRounds');
+  const extra = document.getElementById('roundsExtra');
   if (!c) return;
   c.innerHTML = '';
+  if (extra) extra.innerHTML = '';
+  const m = STATE.currentModality;
   if (STATE.matchDraft.rounds.length === 0) {
-    c.innerHTML = '<p style="color:var(--muted); font-size:0.85rem;">Selecciona al menos 4 jugadores (cantidad par) para generar las rondas.</p>';
+    c.innerHTML = `<p style="color:var(--muted); font-size:0.85rem;">${m === 'mexicano'
+      ? 'Selecciona exactamente 4 jugadores para armar la primera ronda.'
+      : 'Selecciona al menos 4 jugadores (cantidad par) para generar las rondas.'}</p>`;
     return;
   }
   STATE.matchDraft.rounds.forEach((r, idx) => {
     const div = document.createElement('div');
     div.className = 'round-card';
+    const comodin = r.final ? '' : `<div class="comodin-row">🃏 Comodín x2: ${[...r.teamA, ...r.teamB].map(pid =>
+      `<span class="comodin-chip${(r.x2||[]).includes(pid) ? ' on' : ''}" onclick="toggleComodin(${idx},'${pid}')">${getPlayerName(pid)}</span>`).join('')}</div>`;
     div.innerHTML = `
-      <div class="match-date">Ronda ${idx+1}</div>
+      <div class="match-date">Ronda ${idx+1}${r.final ? ' · 🏁 Final (vale doble)' : ''}</div>
       <div class="team-row">
         ${r.teamA.map(pid => playerChipHtml(pid)).join(' + ')}
       </div>
@@ -1086,13 +1287,29 @@ function renderAmericanaRounds() {
       <div class="team-row">
         ${r.teamB.map(pid => playerChipHtml(pid)).join(' + ')}
       </div>
-      <h3 style="margin-top:8px;">Sets</h3>
+      ${expectedLineHtml(r)}
+      ${comodin}
+      <h3 style="margin-top:8px;">Marcador (${r.unit === 'puntos' ? 'puntos' : 'games'})</h3>
       <div id="roundSets_${idx}"></div>
-      <button class="btn-secondary btn-sm" onclick="addRoundSet(${idx})" style="margin-top:4px;">+ Set</button>
+      ${r.unit === 'puntos' ? '' : `<button class="btn-secondary btn-sm" onclick="addRoundSet(${idx})" style="margin-top:4px;">+ Set</button>`}
     `;
     c.appendChild(div);
     renderRoundSets(idx);
   });
+  if (extra) {
+    const n = STATE.matchDraft.rounds.length;
+    const hasFinal = STATE.matchDraft.rounds.some(r => r.final);
+    let html = '';
+    if (m === 'mexicano') {
+      html += `<button class="btn-primary btn-sm" onclick="addStandingRound(false)" style="margin-top:8px;">➕ Siguiente ronda (1.º+4.º vs 2.º+3.º de la noche)</button>`;
+      if (n > 1) html += ` <button class="btn-ghost btn-sm" onclick="removeLastRound()" style="margin-top:8px;">✕ Quitar última ronda</button>`;
+    } else if (draftOpts().final) {
+      html += hasFinal
+        ? `<button class="btn-ghost btn-sm" onclick="removeLastRound()" style="margin-top:8px;">✕ Quitar la final</button>`
+        : `<button class="btn-primary btn-sm" onclick="addStandingRound(true)" style="margin-top:8px;">🏁 Armar la final (1.º+4.º vs 2.º+3.º de la noche)</button>`;
+    }
+    extra.innerHTML = html;
+  }
 }
 
 function renderRoundSets(roundIdx) {
@@ -1104,9 +1321,9 @@ function renderRoundSets(roundIdx) {
     const row = document.createElement('div');
     row.className = 'set-input';
     row.innerHTML = `
-      <input type="number" min="0" max="20" value="${s.a}" placeholder="A" onchange="updateRoundSet(${roundIdx},${sIdx},'a',this.value)">
+      <input type="number" min="0" max="99" value="${s.a}" placeholder="A" oninput="updateRoundSet(${roundIdx},${sIdx},'a',this.value)">
       <span style="text-align:center; color:var(--muted);">-</span>
-      <input type="number" min="0" max="20" value="${s.b}" placeholder="B" onchange="updateRoundSet(${roundIdx},${sIdx},'b',this.value)">
+      <input type="number" min="0" max="99" value="${s.b}" placeholder="B" oninput="updateRoundSet(${roundIdx},${sIdx},'b',this.value)">
       <button class="btn-ghost btn-sm" onclick="removeRoundSet(${roundIdx},${sIdx})" title="quitar">✕</button>
     `;
     c.appendChild(row);
@@ -1180,9 +1397,9 @@ function renderFijoSets() {
     const row = document.createElement('div');
     row.className = 'set-input';
     row.innerHTML = `
-      <input type="number" min="0" max="20" value="${s.a}" placeholder="Equipo A" onchange="updateFijoSet(${idx},'a',this.value)">
+      <input type="number" min="0" max="20" value="${s.a}" placeholder="Equipo A" oninput="updateFijoSet(${idx},'a',this.value)">
       <span style="text-align:center; color:var(--muted);">-</span>
-      <input type="number" min="0" max="20" value="${s.b}" placeholder="Equipo B" onchange="updateFijoSet(${idx},'b',this.value)">
+      <input type="number" min="0" max="20" value="${s.b}" placeholder="Equipo B" oninput="updateFijoSet(${idx},'b',this.value)">
       <button class="btn-ghost btn-sm" onclick="removeFijoSet(${idx})" title="quitar">✕</button>
     `;
     c.appendChild(row);
@@ -1240,7 +1457,19 @@ function renderLibreInputs() {
 /* ==================================================================
    GUARDAR PARTIDO
    ================================================================== */
+function matchSignature(x) {
+  const rounds = (x.rounds || []).map(r =>
+    (r.teamA||[]).join(',') + 'v' + (r.teamB||[]).join(',') + ':' + (r.sets||[]).map(s => (+s.a) + '-' + (+s.b)).join(',')
+      + (r.final ? 'F' : '') + (r.unit || '') + (r.adv ? 'adv' + r.adv.team + r.adv.n : '') + (r.x2 || []).join(',')
+  ).join(';');
+  const libre = x.libreStats
+    ? Object.keys(x.libreStats).sort().map(k => k + '=' + x.libreStats[k].pts + '/' + x.libreStats[k].games).join(',')
+    : '';
+  return [x.date, x.modality, rounds, libre].join('|');
+}
+
 async function saveMatch() {
+  if (STATE.saving) return;            // evita el doble toque
   const date = document.getElementById('matchDate').value;
   if (!date) { toast('Falta la fecha'); return; }
 
@@ -1254,18 +1483,31 @@ async function saveMatch() {
     players: [],
     rounds: [],
     libreStats: null,
-    createdAt: Date.now()
+    createdAt: (STATE.editingMatchId && STATE.matches.find(x => x.id === STATE.editingMatchId)?.createdAt) || Date.now()
   };
 
-  if (m === 'americana' || m === 'roundrobin') {
+  if (isRondas(m)) {
     if (sel.length < 4) { toast('Mínimo 4 jugadores'); return; }
     match.players = sel;
-    match.rounds = STATE.matchDraft.rounds.map(r => ({
-      teamA: r.teamA,
-      teamB: r.teamB,
-      sets: r.sets.filter(s => s.a !== '' && s.b !== '').map(s => ({ a: +s.a, b: +s.b }))
-    })).filter(r => r.sets.length > 0);
-    if (match.rounds.length === 0) { toast('Ingresa al menos 1 set'); return; }
+    match.rounds = STATE.matchDraft.rounds.map(r => {
+      const out = {
+        teamA: r.teamA,
+        teamB: r.teamB,
+        sets: r.sets.filter(s => s.a !== '' && s.b !== '').map(s => ({ a: +s.a, b: +s.b }))
+      };
+      // Firestore no acepta undefined: los extras solo se agregan si existen
+      if (r.unit === 'puntos') out.unit = 'puntos';
+      if (r.adv && r.adv.n > 0) out.adv = { team: r.adv.team, n: r.adv.n };
+      if (r.x2 && r.x2.length) out.x2 = [...r.x2];
+      if (r.final) out.final = true;
+      return out;
+    }).filter(r => r.sets.length > 0);
+    if (match.rounds.length === 0) { toast('Ingresa al menos 1 marcador'); return; }
+    const badAdv = match.rounds.find(r => r.adv &&
+      r.sets.reduce((s, x) => s + (r.adv.team === 'A' ? x.a : x.b), 0) < r.adv.n);
+    if (badAdv) { toast('Con ventaja, el marcador de esa pareja no puede ser menor que la ventaja'); return; }
+    const o = draftOpts();
+    match.opts = { final: !!o.final, ventaja: !!o.ventaja, puntos: !!o.puntos };
   } else if (m === 'fijo') {
     if (STATE.matchDraft.fijoTeamA.length !== 2 || STATE.matchDraft.fijoTeamB.length !== 2) {
       toast('Necesitas 2 jugadores por equipo'); return;
@@ -1278,6 +1520,7 @@ async function saveMatch() {
       teamB: STATE.matchDraft.fijoTeamB,
       sets
     }];
+    match.desafio = !!draftOpts().desafio;
   } else if (m === 'libre') {
     if (sel.length === 0) { toast('Selecciona jugadores'); return; }
     match.players = sel;
@@ -1289,9 +1532,27 @@ async function saveMatch() {
     });
   }
 
+  if (!STATE.editingMatchId) {
+    const sig = matchSignature(match);
+    if (STATE.matches.some(x => matchSignature(x) === sig) &&
+        !confirm('Ya hay un partido idéntico guardado en esa fecha. ¿Guardarlo de nuevo?')) return;
+  }
+
   // ID
   const id = STATE.editingMatchId || genId('m');
-  await dbSet('matches', id, match);
+  const saveBtn = document.getElementById('saveBtn');
+  STATE.saving = true;
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ Guardando…'; }
+  try {
+    await dbSet('matches', id, match);
+  } catch (e) {
+    console.error('Error guardando partido:', e);
+    toast('❌ No se pudo guardar. Revisa la conexión.');
+    return;
+  } finally {
+    STATE.saving = false;
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Partido'; }
+  }
   if (!window.__useFirebase) {
     const existing = STATE.matches.findIndex(x => x.id === id);
     if (existing >= 0) STATE.matches[existing] = { id, ...match };
@@ -1314,7 +1575,8 @@ async function saveMatch() {
   renderFijoSelectors();
   renderFijoSets();
   renderLibreInputs();
-  if (STATE.currentModality === 'americana' || STATE.currentModality === 'roundrobin') {
+  renderOpts();
+  if (isRondas(STATE.currentModality)) {
     renderAmericanaRounds();
   }
   toast('✅ Partido guardado');
@@ -1363,6 +1625,7 @@ function computePlayerStatsForMatch(match) {
       if (!stats[pid]) stats[pid] = { pts:0, games:0, wins:0, lost:0, ties:0, plays:0 };
       stats[pid].plays += 1;
       stats[pid].games += gamesA;
+      stats[pid].gc = (stats[pid].gc || 0) + gamesB;
       if (res.winner === 'A') { stats[pid].wins += 1; stats[pid].pts += STATE.config.pointsWin; }
       else if (res.winner === 'B') { stats[pid].lost += 1; stats[pid].pts += STATE.config.pointsLoss; }
       else { stats[pid].ties += 1; stats[pid].pts += STATE.config.pointsTie; }
@@ -1371,6 +1634,7 @@ function computePlayerStatsForMatch(match) {
       if (!stats[pid]) stats[pid] = { pts:0, games:0, wins:0, lost:0, ties:0, plays:0 };
       stats[pid].plays += 1;
       stats[pid].games += gamesB;
+      stats[pid].gc = (stats[pid].gc || 0) + gamesA;
       if (res.winner === 'B') { stats[pid].wins += 1; stats[pid].pts += STATE.config.pointsWin; }
       else if (res.winner === 'A') { stats[pid].lost += 1; stats[pid].pts += STATE.config.pointsLoss; }
       else { stats[pid].ties += 1; stats[pid].pts += STATE.config.pointsTie; }
@@ -1392,6 +1656,7 @@ function aggregateStats(seasonId) {
       }
       agg[pid].pts += v.pts;
       agg[pid].games += v.games;
+      agg[pid].gc = (agg[pid].gc || 0) + (v.gc || 0);
       agg[pid].wins += v.wins;
       agg[pid].lost += v.lost;
       agg[pid].ties += v.ties;
@@ -1410,7 +1675,7 @@ function renderMatchHistory() {
   const filter = document.getElementById('historyFilter')?.value || 'all';
   let matches = [...STATE.matches];
   if (filter !== 'all') matches = matches.filter(m => m.seasonId === filter);
-  matches.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  matches.sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.createdAt||0) - (a.createdAt||0));
 
   if (matches.length === 0) {
     c.innerHTML = '<div class="empty">No hay partidos cargados todavía 🎾</div>';
@@ -1436,11 +1701,23 @@ function renderMatchHistory() {
         const setsStr = r.sets.map(s => `${s.a}-${s.b}`).join(', ');
         const winBadge = res.winner === 'A' ? `<span class="winner-badge">${aNames}</span>` :
                          res.winner === 'B' ? `<span class="winner-badge">${bNames}</span>` : '';
-        return `<div style="margin:4px 0;">R${i+1}: <b>${aNames}</b> vs <b>${bNames}</b> → ${setsStr} ${winBadge}</div>`;
+        const li = STATE.liga?.roundInfo?.[m.id + '#' + i];
+        const tags = [
+          r.final ? '🏁 final, vale doble' : '',
+          r.unit === 'puntos' ? 'por puntos' : '',
+          r.adv ? `ventaja de ${r.adv.n} para ${r.adv.team === 'A' ? aNames : bNames}${li ? ' (sin ella: ' + li.a + '-' + li.b + ')' : ''}` : '',
+          (r.x2 || []).length ? '🃏 x2 ' + r.x2.map(getPlayerName).join(', ') : ''
+        ].filter(Boolean).join(' · ');
+        const ligaLine = li
+          ? `<div class="round-liga">Esperado ${fmt1(li.expA)} – ${fmt1(li.expB)} · ${aNames} ${ptsHtml(li.delta * li.base)} · ${bNames} ${ptsHtml(-li.delta * li.base)}${tags ? '<br>' + tags : ''}</div>`
+          : '';
+        return `<div style="margin:4px 0;">R${i+1}: <b>${aNames}</b> vs <b>${bNames}</b> → ${setsStr} ${winBadge}</div>${ligaLine}`;
       }).join('');
       content = sets;
     }
-    const modLabel = { americana:'Americana', fijo:'Pareja Fija', roundrobin:'Round Robin', libre:'Libre' }[m.modality] || m.modality;
+    const modLabel = m.desafio ? '🥊 Desafío'
+      : ({ americana:'Americana', mexicano:'Mexicano', fijo:'Pareja Fija', roundrobin:'Round Robin', libre:'Libre' }[m.modality] || m.modality)
+        + (m.opts?.final ? ' + Final' : '');
     card.innerHTML = `
       <div>
         <span class="match-date">${fmtDate(m.date)}</span>
@@ -1476,6 +1753,7 @@ function editMatch(id) {
   document.querySelectorAll('.modality-btn').forEach(x => x.classList.toggle('active', x.dataset.mod === m.modality));
   document.getElementById('matchDate').value = m.date;
   STATE.matchDraft.selectedPlayers = [...(m.players || [])];
+  STATE.matchDraft.opts = { final:false, ventaja:false, puntos:false, ...(m.opts || {}), desafio: !!m.desafio };
 
   if (m.modality === 'libre') {
     renderPlayerSelector();
@@ -1495,14 +1773,18 @@ function editMatch(id) {
     renderFijoSelectors();
     renderFijoSets();
   } else {
-    STATE.matchDraft.rounds = (m.rounds || []).map(r => ({
-      teamA: [...r.teamA], teamB: [...r.teamB],
-      sets: r.sets.map(s => ({a:s.a, b:s.b}))
-    }));
+    STATE.matchDraft.rounds = (m.rounds || []).map(r => {
+      const out = { teamA: [...r.teamA], teamB: [...r.teamB], sets: r.sets.map(s => ({a:s.a, b:s.b})) };
+      if (r.unit === 'puntos') out.unit = 'puntos';
+      if (r.adv) out.adv = { ...r.adv };
+      if (r.x2) out.x2 = [...r.x2];
+      if (r.final) out.final = true;
+      return out;
+    });
     renderPlayerSelector();
     renderAmericanaRounds();
   }
-  updateModalityBlocks();
+  updateModalityBlocks(true);
   document.querySelector('nav.tabs button[data-view=new]').click();
   toast('✏️ Editando partido');
 }
@@ -1517,10 +1799,10 @@ function renderLeaderboard() {
   const filter = document.getElementById('statsFilter')?.value || STATE.config.currentSeasonId || 'all';
   let arr = aggregateStats(filter);
   arr = arr.filter(p => p.plays > 0 || (p.active !== false));
-  arr.sort((a,b) => b.pts - a.pts || b.wins - a.wins || b.games - a.games);
+  arr.forEach(p => { p.diff = p.games - (p.gc || 0); });
+  arr.sort((a,b) => b.pts - a.pts || b.diff - a.diff || b.wins - a.wins);
   tbody.innerHTML = '';
   arr.forEach((p, idx) => {
-    const winPct = p.plays > 0 ? Math.round((p.wins / p.plays) * 100) : 0;
     const tr = document.createElement('tr');
     if (idx < 3 && p.plays > 0) tr.className = 'position-' + (idx+1);
     tr.innerHTML = `
@@ -1532,15 +1814,155 @@ function renderLeaderboard() {
         </span>
       </td>
       <td class="num">${p.plays}</td>
-      <td class="num">${p.wins}</td>
+      <td class="num">${p.wins}-${p.ties}-${p.lost}</td>
       <td class="num"><b>${p.pts}</b></td>
-      <td class="num">${winPct}%</td>
+      <td class="num">${p.diff > 0 ? '+' : ''}${p.diff}</td>
     `;
     tbody.appendChild(tr);
   });
   if (arr.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin datos todavía</td></tr>';
   }
+}
+
+/* ==================================================================
+   LIGA: copa del mes, premios de la fecha y vitrina
+   ================================================================== */
+function fmtPts(v) {
+  const r = Math.round(v);
+  return (r > 0 ? '+' : (r < 0 ? '−' : '')) + Math.abs(r);
+}
+function ptsHtml(v) {
+  const r = Math.round(v);
+  const color = r > 0 ? 'var(--success)' : (r < 0 ? 'var(--danger)' : 'var(--muted)');
+  return `<span style="color:${color}; font-weight:600;">${fmtPts(v)}</span>`;
+}
+function fmt1(x) { return x.toFixed(1).replace('.', ','); }
+function teamNames(team) { return (team||[]).map(getPlayerName).join('+'); }
+function playerCellHtml(pid) {
+  const p = getPlayer(pid) || { name:'?', color:'#999', emoji:'?' };
+  return `<span style="display:inline-flex;align-items:center;gap:6px;">
+    <span class="player-avatar" style="background:${p.color}">${p.emoji||p.name[0]}</span><b>${p.name}</b></span>`;
+}
+function copaLabel(c) {
+  const [y, m] = c.key.split('-');
+  return 'Copa ' + MESES[+m - 1] + ' ' + y;
+}
+function onCopaChange(val) {
+  const L = STATE.liga;
+  const latest = L && L.copas.length ? L.copas[L.copas.length - 1].key : null;
+  STATE.copaSel = (val === latest) ? null : val;
+  renderLiga();
+}
+window.onCopaChange = onCopaChange;
+
+function expectedLineHtml(r) {
+  const L = STATE.liga;
+  if (!L || !r.teamA?.length || !r.teamB?.length) return '';
+  if (r.adv) {
+    const t = r.adv.team === 'A' ? r.teamA : r.teamB;
+    return `<div class="handicap-line">⚖️ Ventaja: <b>${teamNames(t)} parten ${r.adv.n}-0</b>. Anota el marcador final de la cancha, con la ventaja incluida.</div>`;
+  }
+  const size = roundSize(), u = r.unit === 'puntos' ? 'puntos' : 'games';
+  const e = ligaExpected(ligaTeamAvg(r.teamA, L.ratings), ligaTeamAvg(r.teamB, L.ratings), r.unit);
+  const tail = draftOpts().ventaja ? 'Ronda pareja: sin ventaja.' : 'La pareja que saque más que su parte, suma.';
+  return `<div class="handicap-line">⚖️ Hándicap: en ${size} ${u} se esperan <b>${fmt1(size*e)} – ${fmt1(size*(1-e))}</b>. ${tail}</div>`;
+}
+
+function renderLiga() {
+  const L = STATE.liga;
+  const tbl = document.getElementById('copaTable');
+  const sel = document.getElementById('copaFilter');
+  const premios = document.getElementById('ligaPremios');
+  const vit = document.getElementById('ligaVitrina');
+  if (!L || !tbl || !sel || !premios || !vit) return;
+
+  if (L.copas.length === 0) {
+    sel.innerHTML = '';
+    document.getElementById('copaTitle').textContent = 'Copa del mes';
+    tbl.innerHTML = '<div class="empty">Sin fechas todavía. Carga el primer partido 🎾</div>';
+    premios.innerHTML = '<div class="empty">—</div>';
+    vit.innerHTML = '<div class="empty">—</div>';
+    return;
+  }
+
+  const latest = L.copas[L.copas.length - 1];
+  const copa = L.copas.find(c => c.key === STATE.copaSel) || latest;
+  sel.innerHTML = [...L.copas].reverse().map(c =>
+    `<option value="${c.key}" ${c.key === copa.key ? 'selected' : ''}>${copaLabel(c)}${c.champion ? ' · 🏆 ' + getPlayerName(c.champion) : ''}</option>`
+  ).join('');
+  document.getElementById('copaTitle').textContent = copaLabel(copa);
+
+  // ---- Tabla de la copa ----
+  const isCalib = copa.status === 'calibracion';
+  const pts = isCalib ? copa.ptsAll : copa.pts;
+  const lastF = [...copa.fechas].reverse().find(f => isCalib || !f.calib);
+  const rank = Object.keys(pts).sort((a,b) => pts[b] - pts[a]);
+  const statusText = {
+    calibracion: '⚙️ Mes de calibración: estas fechas ajustaron el nivel de cada uno, no dan copa.',
+    enjuego: `🎾 En juego · ${copa.nFechas} fecha${copa.nFechas === 1 ? '' : 's'} jugada${copa.nFechas === 1 ? '' : 's'}${copa.nFechas < LIGA.MIN_FECHAS ? ' (se necesitan ' + LIGA.MIN_FECHAS + ' para que haya campeón)' : ''}`,
+    cerrada: `🏆 Campeón: <b>${copa.champion ? getPlayerName(copa.champion) : ''}</b> · ${copa.nFechas} fechas`,
+    sintitulo: `Sin campeón: se jugó ${copa.nFechas} sola fecha (mínimo ${LIGA.MIN_FECHAS}).`
+  }[copa.status];
+  tbl.innerHTML = `
+    <table>
+      <thead><tr><th>#</th><th>Jugador</th><th class="num">Pts copa</th><th class="num">Últ. fecha</th><th class="num">Nivel</th></tr></thead>
+      <tbody>
+        ${rank.map((pid, i) => `
+          <tr${(!isCalib && i < 3) ? ' class="position-' + (i+1) + '"' : ''}>
+            <td>${i+1}</td>
+            <td>${playerCellHtml(pid)}${copa.champion === pid ? ' 🏆' : ''}</td>
+            <td class="num" style="font-size:1.05rem;">${ptsHtml(pts[pid])}</td>
+            <td class="num">${lastF && lastF.pts[pid] != null ? (lastF.pts[pid] >= 0.5 ? '▲ ' : (lastF.pts[pid] <= -0.5 ? '▼ ' : '')) + fmtPts(lastF.pts[pid]) : '—'}</td>
+            <td class="num">${Math.round(L.ratings[pid] ?? LIGA.INIT)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <p style="font-size:0.8rem; color:var(--muted); margin:10px 0 0 0;">${statusText}</p>
+  `;
+
+  // ---- Premios por fecha (de la copa elegida, la más reciente arriba) ----
+  premios.innerHTML = [...copa.fechas].reverse().map(f => {
+    const a = f.awards || {};
+    const lines = [];
+    if (a.figura)  lines.push(`🏅 <b>Figura:</b> ${getPlayerName(a.figura.pid)} (${fmtPts(a.figura.pts)})`);
+    if (a.mata)    lines.push(`🗡️ <b>Matagigantes:</b> ${teamNames(a.mata.team)} le sacaron ${a.mata.got} ${a.mata.unit} a ${teamNames(a.mata.rival)} (se esperaban ${fmt1(a.mata.exp)})`);
+    if (a.paliza)  lines.push(`🔨 <b>Paliza:</b> ${teamNames(a.paliza.team)} ${a.paliza.score} a ${teamNames(a.paliza.rival)}`);
+    if (a.cuchara) lines.push(`🥄 <b>Cuchara de palo:</b> ${getPlayerName(a.cuchara.pid)} (${fmtPts(a.cuchara.pts)})`);
+    const resumen = Object.keys(f.pts).sort((x,y) => f.pts[y] - f.pts[x])
+      .map(pid => `${getPlayerName(pid)} ${ptsHtml(f.pts[pid])}`).join(' · ');
+    return `
+      <div style="padding:10px 0; border-bottom:1px solid var(--border);">
+        <div class="match-date">Fecha ${f.n} · ${fmtDate(f.date)}${f.calib ? ' · calibración' : ''}</div>
+        <div style="font-size:0.88rem; line-height:1.6; margin-top:4px;">${lines.join('<br>') || '<span style="color:var(--muted);">Fecha pareja: sin premios.</span>'}</div>
+        <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">${resumen}</div>
+      </div>`;
+  }).join('');
+
+  // ---- Vitrina ----
+  const vrows = STATE.players
+    .filter(p => p.active !== false || L.vitrina[p.id])
+    .map(p => ({ p, v: L.vitrina[p.id] || { copas:0, figura:0, mata:0, paliza:0, cuchara:0 } }))
+    .sort((x,y) => y.v.copas - x.v.copas || y.v.figura - x.v.figura || y.v.mata - x.v.mata);
+  vit.innerHTML = `
+    <table>
+      <thead><tr><th>Jugador</th><th class="num">🏆</th><th class="num">🏅</th><th class="num">🗡️</th><th class="num">🔨</th><th class="num">🥄</th></tr></thead>
+      <tbody>
+        ${vrows.map(({p, v}) => `
+          <tr>
+            <td>${playerCellHtml(p.id)}</td>
+            <td class="num"><b>${v.copas}</b></td>
+            <td class="num">${v.figura}</td>
+            <td class="num">${v.mata}</td>
+            <td class="num">${v.paliza}</td>
+            <td class="num">${v.cuchara}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <p style="font-size:0.75rem; color:var(--muted); margin-top:8px;">
+      🏆 copas del mes · 🏅 figura de la fecha (más puntos) · 🗡️ matagigantes (la pareja no favorita que más superó lo esperado) · 🔨 paliza (la ronda más desigual, al menos un tercio de diferencia) · 🥄 cuchara de palo (menos puntos). Las fechas de calibración no cuentan.
+    </p>
+  `;
 }
 
 function renderAdvStats() {
@@ -1964,8 +2386,169 @@ window.clearAll = clearAll;
    ANALYTICS (Nerd Mode 📊)
    ELO, matriz, puntos acumulados, margen, forma, rachas, perf, predictor
    ================================================================== */
-const ELO_K = 32;
-const ELO_INIT = 1000;
+/* === LIGA-CORE-START ===
+   Funciones puras (no tocan el DOM ni STATE); las prueba pruebas/test_liga.js */
+const LIGA = {
+  INIT: 1000,      // nivel inicial
+  K: 6,            // puntos por cada game sobre lo esperado
+  SCALE: 400,      // escala ELO
+  CALIB: 3,        // primeras fechas de la liga: calibran el nivel, no dan copa
+  MIN_FECHAS: 2,   // fechas mínimas en el mes para que haya campeón
+  K_PUNTOS: 3,     // ídem en rondas por puntos (por cada punto sobre lo esperado)
+  SCALE_PUNTOS: 1000, // un punto discrimina ~2,5 veces menos que un game
+  MINUTOS: 90,     // tiempo de cancha
+  MIN_POR_GAME: 2.2 // ritmo medido en el historial (games por ronda / minutos)
+};
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+function localDateStr(d) {
+  d = d || new Date();
+  const z = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+}
+function ligaScale(unit) { return unit === 'puntos' ? LIGA.SCALE_PUNTOS : LIGA.SCALE; }
+function ligaK(unit) { return unit === 'puntos' ? LIGA.K_PUNTOS : LIGA.K; }
+function ligaExpected(ra, rb, unit) { return 1 / (1 + Math.pow(10, (rb - ra) / ligaScale(unit))); }
+// Games (o puntos) realmente ganados: al marcador de la cancha se le descuenta la ventaja
+function ligaGames(r) {
+  let a = 0, b = 0;
+  (r.sets || []).forEach(s => { a += +s.a || 0; b += +s.b || 0; });
+  if (r.adv && r.adv.n > 0) {
+    if (r.adv.team === 'A') a = Math.max(0, a - r.adv.n); else b = Math.max(0, b - r.adv.n);
+  }
+  return { a, b, n: a + b };
+}
+// Ventaja en cancha: lo que la pareja no favorita necesita para que el marcador esperado sea parejo
+function ligaVentaja(teamA, teamB, ratings, size, unit) {
+  const e = ligaExpected(ligaTeamAvg(teamA, ratings), ligaTeamAvg(teamB, ratings), unit);
+  const d = Math.round(size * (2 * e - 1));
+  if (!d) return null;
+  return d > 0 ? { team: 'B', n: d } : { team: 'A', n: -d };
+}
+function ligaTeamAvg(team, ratings) {
+  return team.reduce((s, p) => s + (ratings[p] ?? LIGA.INIT), 0) / team.length;
+}
+
+function ligaAwards(f) {
+  const ids = Object.keys(f.pts);
+  if (!ids.length) return null;
+  ids.sort((x, y) => f.pts[y] - f.pts[x]);
+  const a = {};
+  if (Math.round(f.pts[ids[0]]) > 0) a.figura = { pid: ids[0], pts: f.pts[ids[0]] };
+  const last = ids[ids.length - 1];
+  if (ids.length > 1 && Math.round(f.pts[last]) < 0) a.cuchara = { pid: last, pts: f.pts[last] };
+  let pal = null, mata = null;
+  f.rounds.forEach(r => {
+    const margin = r.n >= 6 ? Math.abs(r.a - r.b) / r.n : 0;   // diferencia relativa: sirve para games y puntos
+    if (margin >= 1/3 && (!pal || margin > pal.margin)) {
+      const aWon = r.a > r.b;
+      pal = { margin, team: aWon ? r.teamA : r.teamB, rival: aWon ? r.teamB : r.teamA,
+              score: aWon ? r.a + '-' + r.b : r.b + '-' + r.a };
+    }
+    if (Math.abs(r.e - 0.5) < 0.02) return;            // parejos: no hay gigante
+    const underA = r.e < 0.5;
+    const s = (underA ? r.surplus : -r.surplus) * r.K;
+    if (s >= LIGA.K && (!mata || s > mata.surplus)) {
+      mata = { surplus: s, unit: r.unit, team: underA ? r.teamA : r.teamB, rival: underA ? r.teamB : r.teamA,
+               got: underA ? r.a : r.b, exp: underA ? r.expA : r.expB };
+    }
+  });
+  if (pal) a.paliza = pal;
+  if (mata) a.mata = mata;
+  return a;
+}
+
+function computeLiga(matches, playerIds, todayStr) {
+  const ratings = {}, history = {}, totals = {};
+  const ensure = pid => {
+    if (pid in ratings) return;
+    ratings[pid] = LIGA.INIT;
+    history[pid] = [{ x: 0, y: LIGA.INIT }];
+    totals[pid] = { exp: 0, real: 0, rounds: 0 };
+  };
+  (playerIds || []).forEach(ensure);
+
+  const valid = (matches || [])
+    .filter(m => m.modality !== 'libre' && m.date && (m.rounds || []).length)
+    .sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.createdAt || 0) - (b.createdAt || 0));
+  const groups = [];
+  valid.forEach(m => {
+    const g = groups[groups.length - 1];
+    if (g && g.date === m.date) g.ms.push(m); else groups.push({ date: m.date, ms: [m] });
+  });
+
+  const fechas = [], roundInfo = {};
+  groups.forEach((g, gi) => {
+    const f = { date: g.date, n: gi + 1, calib: gi < LIGA.CALIB, rounds: [], pts: {} };
+    g.ms.forEach(m => m.rounds.forEach((r, ri) => {
+      const tA = r.teamA || [], tB = r.teamB || [];
+      const gm = ligaGames(r);
+      if (!tA.length || !tB.length || gm.n === 0) return;
+      [...tA, ...tB].forEach(ensure);
+      const ra = ligaTeamAvg(tA, ratings), rb = ligaTeamAvg(tB, ratings);
+      const unit = r.unit === 'puntos' ? 'puntos' : 'games';
+      const K = ligaK(unit);
+      const e = ligaExpected(ra, rb, unit);
+      const expA = gm.n * e, expB = gm.n - expA;
+      const surplus = gm.a - expA;
+      const delta = K * surplus;                 // mueve el nivel
+      // Puntos de copa: la final vale doble para todos; el comodín dobla al que lo usa
+      const base = r.final ? 2 : 1;
+      const x2 = r.final ? [] : (r.x2 || []);
+      const mult = p => base * (x2.includes(p) ? 2 : 1);
+      tA.forEach(p => {
+        ratings[p] += delta; f.pts[p] = (f.pts[p] || 0) + delta * mult(p);
+        if (unit === 'games') { totals[p].exp += expA; totals[p].real += gm.a; totals[p].rounds++; }
+      });
+      tB.forEach(p => {
+        ratings[p] -= delta; f.pts[p] = (f.pts[p] || 0) - delta * mult(p);
+        if (unit === 'games') { totals[p].exp += expB; totals[p].real += gm.b; totals[p].rounds++; }
+      });
+      const info = { teamA: tA, teamB: tB, a: gm.a, b: gm.b, n: gm.n, e, expA, expB, surplus, delta, ra, rb, unit, K, base, x2 };
+      f.rounds.push(info);
+      roundInfo[m.id + '#' + ri] = info;
+    }));
+    Object.keys(ratings).forEach(pid => history[pid].push({ x: gi + 1, y: ratings[pid] }));
+    f.awards = ligaAwards(f);
+    fechas.push(f);
+  });
+
+  // Copas: una por mes calendario
+  const curMonth = (todayStr || '').slice(0, 7);
+  const copas = [];
+  fechas.forEach(f => {
+    const key = f.date.slice(0, 7);
+    let c = copas[copas.length - 1];
+    if (!c || c.key !== key) { c = { key, fechas: [], nFechas: 0, pts: {}, ptsAll: {} }; copas.push(c); }
+    c.fechas.push(f);
+    Object.entries(f.pts).forEach(([p, v]) => { c.ptsAll[p] = (c.ptsAll[p] || 0) + v; });
+    if (f.calib) return;
+    c.nFechas++;
+    Object.entries(f.pts).forEach(([p, v]) => { c.pts[p] = (c.pts[p] || 0) + v; });
+  });
+  copas.forEach(c => {
+    c.closed = c.key < curMonth;
+    const rank = Object.keys(c.pts).sort((x, y) => c.pts[y] - c.pts[x]);
+    c.champion = (c.closed && c.nFechas >= LIGA.MIN_FECHAS && rank.length) ? rank[0] : null;
+    c.status = c.nFechas === 0 ? 'calibracion' : (!c.closed ? 'enjuego' : (c.champion ? 'cerrada' : 'sintitulo'));
+  });
+
+  // Vitrina
+  const vitrina = {};
+  const v = pid => vitrina[pid] || (vitrina[pid] = { copas: 0, figura: 0, mata: 0, paliza: 0, cuchara: 0 });
+  copas.forEach(c => { if (c.champion) v(c.champion).copas++; });
+  fechas.forEach(f => {
+    if (f.calib || !f.awards) return;
+    const a = f.awards;
+    if (a.figura) v(a.figura.pid).figura++;
+    if (a.cuchara) v(a.cuchara.pid).cuchara++;
+    if (a.mata) a.mata.team.forEach(p => v(p).mata++);
+    if (a.paliza) a.paliza.team.forEach(p => v(p).paliza++);
+  });
+
+  return { ratings, history, totals, fechas, copas, vitrina, roundInfo };
+}
+/* === LIGA-CORE-END === */
 
 function setsWinnerOf(r) {
   let a=0, b=0;
@@ -1973,51 +2556,6 @@ function setsWinnerOf(r) {
   return a > b ? 'A' : (b > a ? 'B' : 'tie');
 }
 
-function computeELO() {
-  const ratings = {};
-  const history = {};
-  const perf = {};
-  STATE.players.forEach(p => {
-    ratings[p.id] = ELO_INIT;
-    history[p.id] = [{ x: 0, y: ELO_INIT }];
-    perf[p.id] = { expected: 0, actual: 0, plays: 0 };
-  });
-  const sorted = [...STATE.matches]
-    .filter(m => m.modality !== 'libre')
-    .sort((a,b) => (a.date||'').localeCompare(b.date||''));
-  let step = 0;
-  sorted.forEach(m => {
-    (m.rounds||[]).forEach(r => {
-      if (!r.teamA || !r.teamB || r.teamA.length !== 2 || r.teamB.length !== 2) return;
-      const ra = ((ratings[r.teamA[0]]||ELO_INIT) + (ratings[r.teamA[1]]||ELO_INIT)) / 2;
-      const rb = ((ratings[r.teamB[0]]||ELO_INIT) + (ratings[r.teamB[1]]||ELO_INIT)) / 2;
-      const ea = 1 / (1 + Math.pow(10, (rb - ra) / 400));
-      const eb = 1 - ea;
-      const w = setsWinnerOf(r);
-      const sa = w === 'A' ? 1 : (w === 'tie' ? 0.5 : 0);
-      const sb = 1 - sa;
-      r.teamA.forEach(pid => {
-        if (!(pid in ratings)) return;
-        ratings[pid] += ELO_K * (sa - ea);
-        perf[pid].expected += ea;
-        perf[pid].actual += sa;
-        perf[pid].plays += 1;
-      });
-      r.teamB.forEach(pid => {
-        if (!(pid in ratings)) return;
-        ratings[pid] += ELO_K * (sb - eb);
-        perf[pid].expected += eb;
-        perf[pid].actual += sb;
-        perf[pid].plays += 1;
-      });
-    });
-    step++;
-    Object.keys(ratings).forEach(pid => {
-      history[pid].push({ x: step, y: ratings[pid] });
-    });
-  });
-  return { ratings, history, perf };
-}
 
 function buildPartnerMatrix() {
   const matrix = {};
@@ -2150,26 +2688,27 @@ function renderAnalysis() {
 }
 
 function renderELOSection() {
-  const { ratings, history } = computeELO();
+  const L = STATE.liga || computeLiga([], [], localDateStr());
+  const ratings = L.ratings, history = L.history;
   const arr = STATE.players
     .filter(p => p.active !== false)
-    .map(p => ({ ...p, rating: ratings[p.id] || ELO_INIT }))
+    .map(p => ({ ...p, rating: ratings[p.id] ?? LIGA.INIT }))
     .sort((a,b) => b.rating - a.rating);
   const tbl = document.getElementById('eloTable');
   if (tbl) {
     tbl.innerHTML = `
       <table>
-        <thead><tr><th>#</th><th>Jugador</th><th class="num">ELO</th><th class="num">Δ vs 1000</th></tr></thead>
+        <thead><tr><th>#</th><th>Jugador</th><th class="num">Nivel</th><th class="num">Δ vs 1000</th></tr></thead>
         <tbody>
           ${arr.map((p,i) => {
-            const delta = p.rating - ELO_INIT;
+            const delta = p.rating - LIGA.INIT;
             return `<tr${i<3 ? ' class="position-'+(i+1)+'"' : ''}>
               <td>${i+1}</td>
               <td><span style="display:inline-flex;align-items:center;gap:6px;">
                 <span class="player-avatar" style="background:${p.color}">${p.emoji||p.name[0]}</span>
                 <b>${p.name}</b></span></td>
               <td class="num"><b>${Math.round(p.rating)}</b></td>
-              <td class="num" style="color:${delta>=0?'var(--success)':'var(--danger)'}; font-weight:600;">${delta>=0?'+':''}${Math.round(delta)}</td>
+              <td class="num">${ptsHtml(delta)}</td>
             </tr>`;
           }).join('')}
         </tbody>
@@ -2196,8 +2735,8 @@ function renderELOSection() {
       maintainAspectRatio: false,
       plugins: { legend: { position: 'bottom', labels: { boxWidth: 14 } } },
       scales: {
-        x: { type: 'linear', title: { display: true, text: 'Partido #' }, ticks: { stepSize: 1 } },
-        y: { title: { display: true, text: 'ELO' } }
+        x: { type: 'linear', title: { display: true, text: 'Fecha #' }, ticks: { stepSize: 1 } },
+        y: { title: { display: true, text: 'Nivel' } }
       }
     }
   });
@@ -2374,32 +2913,26 @@ function renderFormStreaks() {
 }
 
 function renderPerfTable() {
-  const { perf, ratings } = computeELO();
+  const L = STATE.liga || computeLiga([], [], localDateStr());
   const c = document.getElementById('perfTable');
   if (!c) return;
   const arr = STATE.players.filter(p => p.active !== false).map(p => {
-    const pf = perf[p.id] || { expected:0, actual:0, plays:0 };
-    return {
-      ...p,
-      expected: pf.expected,
-      actual: pf.actual,
-      delta: pf.actual - pf.expected,
-      plays: pf.plays,
-      rating: ratings[p.id] || ELO_INIT
-    };
+    const t = L.totals[p.id] || { exp:0, real:0, rounds:0 };
+    return { ...p, expected: t.exp, actual: t.real, delta: t.real - t.exp, rounds: t.rounds };
   }).sort((a,b) => b.delta - a.delta);
   c.innerHTML = `
     <p style="font-size:0.85rem; color:var(--muted); margin:0 0 8px 0;">
-      Resultados <i>reales</i> (V=1, E=0.5, D=0) vs los <i>esperados</i> por ELO antes de cada ronda. Δ positivo = over-performer, Δ negativo = under-performer.
+      Games que ganó cada uno (con su pareja) frente a los que se <i>esperaban</i> según el nivel de ese momento, sumando todo el historial. Δ positivo = rindió sobre su nivel.
     </p>
     <table>
-      <thead><tr><th>Jugador</th><th class="num">Esp.</th><th class="num">Real</th><th class="num">Δ</th></tr></thead>
+      <thead><tr><th>Jugador</th><th class="num">Rondas</th><th class="num">Esp.</th><th class="num">Real</th><th class="num">Δ</th></tr></thead>
       <tbody>${arr.map(p => `
         <tr>
           <td><span style="display:inline-flex;align-items:center;gap:6px;"><span class="player-avatar" style="background:${p.color}">${p.emoji||p.name[0]}</span>${p.name}</span></td>
-          <td class="num">${p.expected.toFixed(2)}</td>
-          <td class="num">${p.actual.toFixed(2)}</td>
-          <td class="num" style="color:${p.delta>=0?'var(--success)':'var(--danger)'}; font-weight:600;">${p.delta>=0?'+':''}${p.delta.toFixed(2)}</td>
+          <td class="num">${p.rounds}</td>
+          <td class="num">${fmt1(p.expected)}</td>
+          <td class="num">${p.actual}</td>
+          <td class="num" style="color:${p.delta>=0?'var(--success)':'var(--danger)'}; font-weight:600;">${p.delta>=0?'+':'−'}${fmt1(Math.abs(p.delta))}</td>
         </tr>`).join('')}
       </tbody>
     </table>
@@ -2443,10 +2976,10 @@ function renderPredictor() {
     resBox.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; text-align:center; padding:10px 0;">Elige 2 jugadores por equipo para calcular probabilidades.</p>';
     return;
   }
-  const { ratings } = computeELO();
-  const raAvg = (ratings[STATE.predDraft.teamA[0]] + ratings[STATE.predDraft.teamA[1]]) / 2;
-  const rbAvg = (ratings[STATE.predDraft.teamB[0]] + ratings[STATE.predDraft.teamB[1]]) / 2;
-  const ea = 1 / (1 + Math.pow(10, (rbAvg - raAvg) / 400));
+  const ratings = (STATE.liga || computeLiga([], [], localDateStr())).ratings;
+  const raAvg = ligaTeamAvg(STATE.predDraft.teamA, ratings);
+  const rbAvg = ligaTeamAvg(STATE.predDraft.teamB, ratings);
+  const ea = ligaExpected(raAvg, rbAvg);
   const eb = 1 - ea;
   const namesA = STATE.predDraft.teamA.map(getPlayerName).join(' + ');
   const namesB = STATE.predDraft.teamB.map(getPlayerName).join(' + ');
@@ -2456,18 +2989,18 @@ function renderPredictor() {
     <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:8px; align-items:center; padding:14px; background: var(--bg); border-radius:10px;">
       <div style="text-align:center;">
         <div style="font-size:0.75rem; color:var(--muted);">${namesA}</div>
-        <div style="font-size:1.7rem; font-weight:bold; color:${favColor};">${(ea*100).toFixed(1)}%</div>
-        <div style="font-size:0.7rem; color:var(--muted);">ELO: ${Math.round(raAvg)}</div>
+        <div style="font-size:1.7rem; font-weight:bold; color:${favColor};">${fmt1(12*ea)}</div>
+        <div style="font-size:0.7rem; color:var(--muted);">Nivel: ${Math.round(raAvg)}</div>
       </div>
       <div style="font-size:1.3rem; color:var(--muted); font-weight:bold;">vs</div>
       <div style="text-align:center;">
         <div style="font-size:0.75rem; color:var(--muted);">${namesB}</div>
-        <div style="font-size:1.7rem; font-weight:bold; color:${favColorB};">${(eb*100).toFixed(1)}%</div>
-        <div style="font-size:0.7rem; color:var(--muted);">ELO: ${Math.round(rbAvg)}</div>
+        <div style="font-size:1.7rem; font-weight:bold; color:${favColorB};">${fmt1(12*eb)}</div>
+        <div style="font-size:0.7rem; color:var(--muted);">Nivel: ${Math.round(rbAvg)}</div>
       </div>
     </div>
     <p style="font-size:0.75rem; color:var(--muted); text-align:center; margin-top:8px;">
-      Diferencia de ELO: ${Math.round(Math.abs(raAvg - rbAvg))} pts
+      Marcador esperado en una ronda de 12 games (${Math.round(ea*100)}% – ${Math.round(eb*100)}% de los games). El que saque más que eso, suma.
     </p>
   `;
 }
@@ -2476,13 +3009,14 @@ function renderPredictor() {
    INICIALIZACIÓN
    ================================================================== */
 function initApp() {
-  document.getElementById('matchDate').valueAsDate = new Date();
+  if (window.__appStarted) return;   // una sola vez: evita suscripciones duplicadas
+  window.__appStarted = true;
+  document.getElementById('matchDate').value = localDateStr();   // fecha local, no UTC
+  updateModalityBlocks(true);   // muestra desde el inicio el bloque de la modalidad activa
   loadAllData();
 }
 
 window.addEventListener('firebaseReady', initApp);
-// Fallback si el módulo Firebase tarda
-setTimeout(() => { if (!window.__appStarted) { window.__appStarted = true; initApp(); } }, 500);
 </script>
 
 </body>

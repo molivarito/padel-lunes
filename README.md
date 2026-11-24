@@ -2,6 +2,15 @@
 
 App web para llevar el registro de los partidos de pádel con tus amigos. Soporta múltiples modalidades (Americana, Pareja Fija, Round Robin, Modo Libre), historial completo, estadísticas avanzadas y sincronización en tiempo real entre todos los jugadores vía Firebase.
 
+## 🏆 La liga (versión 2, noviembre 2026)
+
+- **Nivel con hándicap**: cada jugador tiene un nivel (parte en 1000). Antes de cada ronda se calcula el marcador esperado con el nivel de las dos parejas; cada game sobre lo esperado vale 6 puntos para cada integrante, y los mismos puntos se le restan a cada rival. Se puede sumar perdiendo y restar ganando.
+- **Copa del mes**: la gana quien más puntos suma en las fechas del mes (mínimo 2 fechas). Las 3 primeras fechas de la liga son de calibración: mueven el nivel, no dan copa.
+- **Premios de cada fecha**: figura, matagigantes, paliza y cuchara de palo, y una vitrina con el conteo histórico.
+- **Modalidades** (pensadas para 90 minutos de cancha; la app muestra el reparto del tiempo): americana, americana con final (1.º+4.º vs 2.º+3.º, vale doble), mexicano (5 rondas armadas por la tabla de la noche), ventaja en cancha (la pareja no favorita parte con games arriba), rondas por puntos, comodín x2 (uno por jugador y por noche) y desafío de pareja fija. La final y el comodín multiplican los puntos de copa, no el nivel.
+- La tabla clásica 3-1-0 sigue disponible, ahora con desempate por diferencia de games.
+- Las constantes están en `LIGA` dentro de `index.html`. El cálculo es un bloque de funciones puras (`LIGA-CORE`) que se prueba con `node pruebas/test_liga.js` contra un respaldo de Firestore en `respaldos/` (carpeta fuera de git).
+
 ## 🚀 Probarla ya mismo (modo local)
 
 Abre `index.html` directamente en el navegador. Funciona offline guardando todo en `localStorage` (sirve si una sola persona lleva el registro). Para que **todos puedan cargar resultados desde su celular** y verlo sincronizado, sigue los pasos de Firebase abajo.
