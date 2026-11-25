@@ -37,7 +37,10 @@ const f0 = v => (v >= 0 ? '+' : '') + v.toFixed(0);
 const ids = Object.keys(L.ratings);
 const sum = ids.reduce((s, p) => s + L.ratings[p], 0);
 assert(Math.abs(sum - api.LIGA.INIT * ids.length) < 1e-6, 'el nivel total debe conservarse');
-L.fechas.forEach(f => assert(Math.abs(Object.values(f.pts).reduce((s, v) => s + v, 0)) < 1e-6, 'cada fecha suma cero'));
+// Cada fecha suma cero, salvo lo que agrega el comodín (dobla solo a quien lo usa, por diseño)
+const comodinExtra = f => f.rounds.reduce((s, r) => s + (r.x2 || []).reduce((t, p) =>
+  t + (r.teamA.includes(p) ? 1 : -1) * r.delta * r.base, 0), 0);
+L.fechas.forEach(f => assert(Math.abs(Object.values(f.pts).reduce((s, v) => s + v, 0) - comodinExtra(f)) < 1e-6, 'cada fecha suma cero (sin el extra del comodín)'));
 assert(Math.abs(api.ligaExpected(1000, 1000) - 0.5) < 1e-12);
 // Caso de manual: iguales, 12 games, 8-4 -> +12 / -12
 const T = api.computeLiga([{ id: 'x', date: '2026-01-05', modality: 'americana',
@@ -60,6 +63,22 @@ assert.deepStrictEqual(['a', 'b', 'c', 'd'].map(p => Math.round(X.fechas[0].pts[
 assert.strictEqual(Math.round(X.ratings.a), 1012); assert.strictEqual(Math.round(X.ratings.c), 988);
 X = mk({ final: true, x2: ['a'] });
 assert.strictEqual(Math.round(X.fechas[0].pts.a), 24);
+// Comodín asimétrico: la fecha deja de sumar cero, pero el invariante corregido se cumple
+X = mk({ x2: ['b'] });
+assert.deepStrictEqual(['a', 'b', 'c', 'd'].map(p => Math.round(X.fechas[0].pts[p])), [12, 24, -12, -12]);
+assert(Math.abs(Object.values(X.fechas[0].pts).reduce((s, v) => s + v, 0) - comodinExtra(X.fechas[0])) < 1e-6);
+// Empates: figura, cuchara y copa se comparten, sin depender del orden de los jugadores
+const fijo = (tA, tB, date) => ({ id: 'f' + date, date, modality: 'fijo', rounds: [{ teamA: tA, teamB: tB, sets: [{ a: 6, b: 2 }, { a: 6, b: 3 }] }] });
+for (const [tA, tB] of [[['a', 'b'], ['c', 'd']], [['b', 'a'], ['d', 'c']]]) {
+  const F = api.computeLiga(['2026-01-05', '2026-01-12', '2026-01-19', '2026-02-02', '2026-02-09'].map(d => fijo(tA, tB, d)), [], '2026-03-01');
+  const aw = F.fechas[3].awards;
+  assert.deepStrictEqual([...aw.figura.pids].sort(), ['a', 'b']);
+  assert.deepStrictEqual([...aw.cuchara.pids].sort(), ['c', 'd']);
+  const feb = F.copas.find(c => c.key === '2026-02');
+  assert.deepStrictEqual([...feb.champions].sort(), ['a', 'b']);
+  assert.strictEqual(F.vitrina.a.copas, 1); assert.strictEqual(F.vitrina.b.copas, 1);
+  assert.strictEqual(F.vitrina.a.figura, 2); assert.strictEqual(F.vitrina.b.figura, 2);
+}
 // Ventaja: se descuenta del marcador de la cancha antes de puntuar (8-4 con 2 de ventaja para B = 8-2 real)
 assert.deepStrictEqual(api.ligaGames({ sets: [{ a: 8, b: 4 }], adv: { team: 'B', n: 2 } }), { a: 8, b: 2, n: 10 });
 X = mk({ adv: { team: 'B', n: 2 } });
@@ -75,14 +94,14 @@ assert(api.ligaExpected(1100, 900, 'puntos') < api.ligaExpected(1100, 900));
 
 console.log('Nivel:', ids.sort((a, b) => L.ratings[b] - L.ratings[a]).map(p => `${nm(p)} ${L.ratings[p].toFixed(0)}`).join(' · '));
 L.copas.forEach(c => {
-  console.log(`\n== ${c.key} [${c.status}] fechas=${c.nFechas} campeón=${c.champion ? nm(c.champion) : '-'}`);
+  console.log(`\n== ${c.key} [${c.status}] fechas=${c.nFechas} campeón=${c.champions.length ? c.champions.map(nm).join('+') : '-'}`);
   console.log('   pts:', Object.entries(c.nFechas ? c.pts : c.ptsAll).sort((a, b) => b[1] - a[1]).map(([p, v]) => `${nm(p)} ${f0(v)}`).join(' · '));
   c.fechas.forEach(f => {
     const a = f.awards || {};
     console.log(`   F${f.n} ${f.date}${f.calib ? ' (calib)' : ''}:`, Object.entries(f.pts).sort((x, y) => y[1] - x[1]).map(([p, v]) => `${nm(p)} ${f0(v)}`).join(' '));
     f.rounds.forEach(r => console.log(`        ${r.teamA.map(nm).join('+')} vs ${r.teamB.map(nm).join('+')}  real ${r.a}-${r.b}  esp ${r.expA.toFixed(1)}-${r.expB.toFixed(1)}  ${f0(r.delta)}`));
-    console.log('        premios:', [a.figura && 'figura ' + nm(a.figura.pid), a.mata && 'mata ' + a.mata.team.map(nm).join('+') + ` (${a.mata.got} vs esp ${a.mata.exp.toFixed(1)})`,
-      a.paliza && 'paliza ' + a.paliza.team.map(nm).join('+') + ' ' + a.paliza.score, a.cuchara && 'cuchara ' + nm(a.cuchara.pid)].filter(Boolean).join(' | '));
+    console.log('        premios:', [a.figura && 'figura ' + a.figura.pids.map(nm).join('+'), a.mata && 'mata ' + a.mata.team.map(nm).join('+') + ` (${a.mata.got} vs esp ${a.mata.exp.toFixed(1)})`,
+      a.paliza && 'paliza ' + a.paliza.team.map(nm).join('+') + ' ' + a.paliza.score, a.cuchara && 'cuchara ' + a.cuchara.pids.map(nm).join('+')].filter(Boolean).join(' | '));
   });
 });
 console.log('\nVitrina:', JSON.stringify(Object.fromEntries(Object.entries(L.vitrina).map(([p, v]) => [nm(p), v]))));

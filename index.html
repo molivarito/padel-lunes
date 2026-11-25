@@ -446,6 +446,10 @@
   <section id="view-new" class="view active">
     <div class="card">
       <h2>➕ Nuevo Partido</h2>
+      <div id="editBanner" style="display:none; background:#fef3c7; border:1px solid #f59e0b; border-radius:10px; padding:8px 10px; margin:0 0 12px 0; font-size:0.88rem;">
+        ✏️ <b>Editando el partido del <span id="editBannerDate"></span>.</b> Al guardar se reemplaza ese partido.
+        <button class="btn-secondary btn-sm" onclick="cancelEdit()" style="margin-left:6px;">✖ Cancelar edición</button>
+      </div>
 
       <div class="field">
         <label>Fecha</label>
@@ -781,6 +785,7 @@ puntos   = 6 · (games ganados − esperado)</pre>
     } catch(e) {
       console.error("Error iniciando Firebase:", e);
       document.getElementById('syncStatus').textContent = "🔴 Error Firebase — modo local";
+      window.__fbFailed = true;   // saveMatch avisa que lo guardado queda solo en este celular
       document.getElementById('firebaseWarn').style.display = 'block';
     }
   } else {
@@ -1472,6 +1477,7 @@ async function saveMatch() {
   if (STATE.saving) return;            // evita el doble toque
   const date = document.getElementById('matchDate').value;
   if (!date) { toast('Falta la fecha'); return; }
+  if (window.__fbFailed && !confirm('Firebase no cargó: este partido quedará guardado SOLO en este celular y los demás no lo verán. Lo mejor es recargar la app y volver a intentar. ¿Guardar igual?')) return;
 
   const m = STATE.currentModality;
   const sel = STATE.matchDraft.selectedPlayers;
@@ -1551,7 +1557,7 @@ async function saveMatch() {
     return;
   } finally {
     STATE.saving = false;
-    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Partido'; }
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = STATE.editingMatchId ? '💾 Guardar cambios' : '💾 Guardar Partido'; }
   }
   if (!window.__useFirebase) {
     const existing = STATE.matches.findIndex(x => x.id === id);
@@ -1561,7 +1567,15 @@ async function saveMatch() {
     renderAll();
   }
 
-  // Reset draft
+  resetDraft();
+  toast(window.__fbFailed ? '⚠️ Guardado solo en este celular' : '✅ Partido guardado');
+  // Cambiar a vista historial
+  document.querySelector('nav.tabs button[data-view=history]').click();
+}
+window.saveMatch = saveMatch;
+
+// Deja el formulario de carga en blanco y sale del modo edición
+function resetDraft() {
   STATE.matchDraft = {
     selectedPlayers: [],
     rounds: [],
@@ -1569,8 +1583,9 @@ async function saveMatch() {
     fijoTeamB: [],
     fijoSets: [{a:'',b:''}]
   };
-  STATE.editingMatchId = null;
-  document.querySelectorAll('input[type=number]').forEach(i => i.value = '');
+  setEditing(null);
+  // Solo los campos del formulario de carga: los de Config (puntos 3-1-0) no se tocan
+  document.querySelectorAll('#view-new input[type=number]').forEach(i => i.value = '');
   renderPlayerSelector();
   renderFijoSelectors();
   renderFijoSets();
@@ -1579,11 +1594,23 @@ async function saveMatch() {
   if (isRondas(STATE.currentModality)) {
     renderAmericanaRounds();
   }
-  toast('✅ Partido guardado');
-  // Cambiar a vista historial
-  document.querySelector('nav.tabs button[data-view=history]').click();
 }
-window.saveMatch = saveMatch;
+function setEditing(id) {
+  STATE.editingMatchId = id;
+  const m = id ? STATE.matches.find(x => x.id === id) : null;
+  const banner = document.getElementById('editBanner');
+  if (banner) banner.style.display = m ? 'block' : 'none';
+  const d = document.getElementById('editBannerDate');
+  if (d && m) d.textContent = fmtDate(m.date);
+  const btn = document.getElementById('saveBtn');
+  if (btn && !STATE.saving) btn.textContent = m ? '💾 Guardar cambios' : '💾 Guardar Partido';
+}
+function cancelEdit() {
+  document.getElementById('matchDate').value = localDateStr();
+  resetDraft();
+  toast('Edición cancelada');
+}
+window.cancelEdit = cancelEdit;
 
 /* ==================================================================
    CÁLCULO DE PUNTOS Y STATS
@@ -1748,7 +1775,7 @@ window.deleteMatch = deleteMatch;
 function editMatch(id) {
   const m = STATE.matches.find(x => x.id === id);
   if (!m) return;
-  STATE.editingMatchId = id;
+  setEditing(id);
   STATE.currentModality = m.modality;
   document.querySelectorAll('.modality-btn').forEach(x => x.classList.toggle('active', x.dataset.mod === m.modality));
   document.getElementById('matchDate').value = m.date;
@@ -1889,7 +1916,7 @@ function renderLiga() {
   const latest = L.copas[L.copas.length - 1];
   const copa = L.copas.find(c => c.key === STATE.copaSel) || latest;
   sel.innerHTML = [...L.copas].reverse().map(c =>
-    `<option value="${c.key}" ${c.key === copa.key ? 'selected' : ''}>${copaLabel(c)}${c.champion ? ' · 🏆 ' + getPlayerName(c.champion) : ''}</option>`
+    `<option value="${c.key}" ${c.key === copa.key ? 'selected' : ''}>${copaLabel(c)}${c.champion ? ' · 🏆 ' + c.champions.map(getPlayerName).join(' y ') : ''}</option>`
   ).join('');
   document.getElementById('copaTitle').textContent = copaLabel(copa);
 
@@ -1901,7 +1928,7 @@ function renderLiga() {
   const statusText = {
     calibracion: '⚙️ Mes de calibración: estas fechas ajustaron el nivel de cada uno, no dan copa.',
     enjuego: `🎾 En juego · ${copa.nFechas} fecha${copa.nFechas === 1 ? '' : 's'} jugada${copa.nFechas === 1 ? '' : 's'}${copa.nFechas < LIGA.MIN_FECHAS ? ' (se necesitan ' + LIGA.MIN_FECHAS + ' para que haya campeón)' : ''}`,
-    cerrada: `🏆 Campeón: <b>${copa.champion ? getPlayerName(copa.champion) : ''}</b> · ${copa.nFechas} fechas`,
+    cerrada: `🏆 Campeón: <b>${copa.champions.map(getPlayerName).join(' y ')}</b> · ${copa.nFechas} fechas`,
     sintitulo: `Sin campeón: se jugó ${copa.nFechas} sola fecha (mínimo ${LIGA.MIN_FECHAS}).`
   }[copa.status];
   tbl.innerHTML = `
@@ -1911,7 +1938,7 @@ function renderLiga() {
         ${rank.map((pid, i) => `
           <tr${(!isCalib && i < 3) ? ' class="position-' + (i+1) + '"' : ''}>
             <td>${i+1}</td>
-            <td>${playerCellHtml(pid)}${copa.champion === pid ? ' 🏆' : ''}</td>
+            <td>${playerCellHtml(pid)}${copa.champions.includes(pid) ? ' 🏆' : ''}</td>
             <td class="num" style="font-size:1.05rem;">${ptsHtml(pts[pid])}</td>
             <td class="num">${lastF && lastF.pts[pid] != null ? (lastF.pts[pid] >= 0.5 ? '▲ ' : (lastF.pts[pid] <= -0.5 ? '▼ ' : '')) + fmtPts(lastF.pts[pid]) : '—'}</td>
             <td class="num">${Math.round(L.ratings[pid] ?? LIGA.INIT)}</td>
@@ -1925,10 +1952,10 @@ function renderLiga() {
   premios.innerHTML = [...copa.fechas].reverse().map(f => {
     const a = f.awards || {};
     const lines = [];
-    if (a.figura)  lines.push(`🏅 <b>Figura:</b> ${getPlayerName(a.figura.pid)} (${fmtPts(a.figura.pts)})`);
+    if (a.figura)  lines.push(`🏅 <b>Figura:</b> ${a.figura.pids.map(getPlayerName).join(' y ')} (${fmtPts(a.figura.pts)})`);
     if (a.mata)    lines.push(`🗡️ <b>Matagigantes:</b> ${teamNames(a.mata.team)} le sacaron ${a.mata.got} ${a.mata.unit} a ${teamNames(a.mata.rival)} (se esperaban ${fmt1(a.mata.exp)})`);
     if (a.paliza)  lines.push(`🔨 <b>Paliza:</b> ${teamNames(a.paliza.team)} ${a.paliza.score} a ${teamNames(a.paliza.rival)}`);
-    if (a.cuchara) lines.push(`🥄 <b>Cuchara de palo:</b> ${getPlayerName(a.cuchara.pid)} (${fmtPts(a.cuchara.pts)})`);
+    if (a.cuchara) lines.push(`🥄 <b>Cuchara de palo:</b> ${a.cuchara.pids.map(getPlayerName).join(' y ')} (${fmtPts(a.cuchara.pts)})`);
     const resumen = Object.keys(f.pts).sort((x,y) => f.pts[y] - f.pts[x])
       .map(pid => `${getPlayerName(pid)} ${ptsHtml(f.pts[pid])}`).join(' · ');
     return `
@@ -2298,9 +2325,11 @@ function renderConfigInputs() {
 }
 
 async function saveConfig() {
-  STATE.config.pointsWin = +document.getElementById('pointsWin').value || 0;
-  STATE.config.pointsTie = +document.getElementById('pointsTie').value || 0;
-  STATE.config.pointsLoss = +document.getElementById('pointsLoss').value || 0;
+  // Un campo vacío conserva el valor que había (antes se guardaba como 0)
+  const num = (id, prev) => { const v = document.getElementById(id).value.trim(); return v === '' || isNaN(+v) ? prev : +v; };
+  STATE.config.pointsWin = num('pointsWin', STATE.config.pointsWin);
+  STATE.config.pointsTie = num('pointsTie', STATE.config.pointsTie);
+  STATE.config.pointsLoss = num('pointsLoss', STATE.config.pointsLoss);
   await dbSet('config', 'main', STATE.config);
   if (!window.__useFirebase) lsSave();
   renderAll();
@@ -2434,9 +2463,11 @@ function ligaAwards(f) {
   if (!ids.length) return null;
   ids.sort((x, y) => f.pts[y] - f.pts[x]);
   const a = {};
-  if (Math.round(f.pts[ids[0]]) > 0) a.figura = { pid: ids[0], pts: f.pts[ids[0]] };
+  // En empate el premio se comparte (antes lo decidía el orden en que se eligieron los jugadores)
+  const tied = v => ids.filter(p => Math.abs(f.pts[p] - v) < 1e-6);
+  if (Math.round(f.pts[ids[0]]) > 0) a.figura = { pids: tied(f.pts[ids[0]]), pts: f.pts[ids[0]] };
   const last = ids[ids.length - 1];
-  if (ids.length > 1 && Math.round(f.pts[last]) < 0) a.cuchara = { pid: last, pts: f.pts[last] };
+  if (ids.length > 1 && Math.round(f.pts[last]) < 0) a.cuchara = { pids: tied(f.pts[last]), pts: f.pts[last] };
   let pal = null, mata = null;
   f.rounds.forEach(r => {
     const margin = r.n >= 6 ? Math.abs(r.a - r.b) / r.n : 0;   // diferencia relativa: sirve para games y puntos
@@ -2529,19 +2560,21 @@ function computeLiga(matches, playerIds, todayStr) {
   copas.forEach(c => {
     c.closed = c.key < curMonth;
     const rank = Object.keys(c.pts).sort((x, y) => c.pts[y] - c.pts[x]);
-    c.champion = (c.closed && c.nFechas >= LIGA.MIN_FECHAS && rank.length) ? rank[0] : null;
+    const crowned = c.closed && c.nFechas >= LIGA.MIN_FECHAS && rank.length;
+    c.champions = crowned ? rank.filter(p => Math.abs(c.pts[p] - c.pts[rank[0]]) < 1e-6) : [];   // empate: copa compartida
+    c.champion = c.champions[0] || null;
     c.status = c.nFechas === 0 ? 'calibracion' : (!c.closed ? 'enjuego' : (c.champion ? 'cerrada' : 'sintitulo'));
   });
 
   // Vitrina
   const vitrina = {};
   const v = pid => vitrina[pid] || (vitrina[pid] = { copas: 0, figura: 0, mata: 0, paliza: 0, cuchara: 0 });
-  copas.forEach(c => { if (c.champion) v(c.champion).copas++; });
+  copas.forEach(c => c.champions.forEach(p => v(p).copas++));
   fechas.forEach(f => {
     if (f.calib || !f.awards) return;
     const a = f.awards;
-    if (a.figura) v(a.figura.pid).figura++;
-    if (a.cuchara) v(a.cuchara.pid).cuchara++;
+    if (a.figura) a.figura.pids.forEach(p => v(p).figura++);
+    if (a.cuchara) a.cuchara.pids.forEach(p => v(p).cuchara++);
     if (a.mata) a.mata.team.forEach(p => v(p).mata++);
     if (a.paliza) a.paliza.team.forEach(p => v(p).paliza++);
   });
